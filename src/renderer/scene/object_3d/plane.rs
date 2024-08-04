@@ -17,7 +17,7 @@ impl Plane {
     pub fn new(normal: Vector, point: Point) -> Plane {
         let Vector { x: a, y: b, z: c } = normal;
 
-        let d: f32 = a*normal.x + b*normal.y + c*normal.z;
+        let d: f32 = a*point.x + b*point.y + c*point.z;
 
         Plane {
             normal,
