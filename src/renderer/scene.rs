@@ -1,25 +1,26 @@
-use std::ascii::escape_default;
 use std::collections::HashMap;
 use uuid::Uuid;
-use object_3d::mesh::Mesh;
+
 use crate::renderer::scene::camera::Camera;
-use crate::renderer::scene::object_2d::point::Point as Point2D;
-use crate::renderer::scene::object_3d::triangle::{Triangle as Triangle3D};
-use crate::renderer::scene::object_2d::triangle::{Triangle as Triangle2D};
-use crate::renderer::scene::object_3d::plane::Plane;
-use crate::renderer::scene::object_3d::plane_direction::PlaneDirection;
-use crate::renderer::scene::object_3d::point::{Point as Point3D, Point};
+use crate::renderer::scene::model_2d::pixel::Pixel;
+use crate::renderer::scene::model_2d::point::{Point as Point2D};
+use crate::renderer::scene::model_2d::triangle::Triangle as Triangle2D;
+use crate::renderer::scene::model_3d::mesh::Mesh;
+use crate::renderer::scene::model_3d::plane::Plane;
+use crate::renderer::scene::model_3d::plane_direction::PlaneDirection;
+use crate::renderer::scene::model_3d::point::Point as Point3D;
+use crate::renderer::scene::model_3d::triangle::Triangle as Triangle3D;
 
 pub mod camera;
-pub mod object_2d;
-pub mod object_3d;
+pub mod model_2d;
+pub mod model_3d;
 
 pub type CameraID = Uuid;
-pub type ObjectID = Uuid;
+pub type MeshID = Uuid;
 
 pub struct Scene {
     cameras: HashMap<CameraID, Camera>,
-    objects: HashMap<ObjectID, Mesh>
+    objects: HashMap<MeshID, Mesh>
 }
 
 impl Scene {
@@ -42,12 +43,55 @@ impl Scene {
         self.cameras.get_mut(&camera_id)
     }
 
-    pub fn add_mesh(&mut self, mesh: Mesh) -> ObjectID {
-        let object_id: ObjectID = Uuid::new_v4();
+    pub fn get_mesh(&self, mesh_id: MeshID) -> Option<&Mesh> {
+        self.objects.get(&mesh_id)
+    }
 
-        self.objects.insert(object_id, mesh);
+    pub fn add_mesh(&mut self, points: Vec<Point3D>, faces: Vec<[usize; 3]>) -> MeshID {
+        let object_id: MeshID = Uuid::new_v4();
+
+        self.objects.insert(object_id, Mesh { points, faces });
 
         object_id
+    }
+
+    pub fn add_cube(&mut self, position: Point3D, width: f32, height: f32, length: f32) -> MeshID {
+        let width: f32 = width / 2.0;
+        let height: f32 = height / 2.0;
+        let length: f32 = length / 2.0;
+
+        let Point3D { x, y, z } = position;
+
+        let points: Vec<Point3D> = vec![
+            /* front face */
+            Point3D { x: x - width, y: y - height, z: z - length }, /* 0 bottom left */
+            Point3D { x: x - width, y: y + height, z: z - length }, /* 1 top left */
+            Point3D { x: x + width, y: y + height, z: z - length }, /* 2 top right */
+            Point3D { x: x + width, y: y - height, z: z - length }, /* 3 bottom right */
+
+            /* back face */
+            Point3D { x: x - width, y: y - height, z: z + length }, /* 4 bottom left */
+            Point3D { x: x - width, y: y + height, z: z + length }, /* 5 top left */
+            Point3D { x: x + width, y: y + height, z: z + length }, /* 6 top right */
+            Point3D { x: x + width, y: y - height, z: z + length }, /* 7 bottom right */
+        ];
+
+        let faces: Vec<[usize; 3]> = vec![
+            /* front face */
+            [0, 1, 2], [0, 2, 3],
+            /* back face */
+            [4, 5, 6], [4, 6, 7],
+            /* left face */
+            [0, 1, 4], [1, 5, 4],
+            /* top face */
+            [1, 2, 5], [2, 5, 6],
+            /* left face */
+            [2, 6, 3], [3, 6, 7],
+            /* bottom face */
+            [0, 4, 7], [0, 7, 3],
+        ];
+
+        self.add_mesh(points, faces)
     }
 
     pub fn render(&self, camera_id: CameraID) -> Result<Vec<Triangle2D>, &str> {
@@ -62,15 +106,15 @@ impl Scene {
             .last()
             .unwrap_or(vec![])
             .iter()
-            .map(|triangle3d: &Triangle3D| self.project_triangle(&camera_planes, camera.focal_length, &triangle3d))
+            .map(|triangle3d: &Triangle3D| Self::project_triangle(&camera_planes, camera.focal_length(), &triangle3d))
             .collect();
 
         Ok(triangles2d)
     }
 
     #[inline]
-    fn project_triangle(&self, camera_planes: &HashMap<PlaneDirection, Plane>, focal_length: f32, triangle: &Triangle3D) -> Triangle2D {
-        let vertices: Vec<Point2D> = triangle.vertices
+    fn project_triangle(camera_planes: &HashMap<PlaneDirection, Plane>, focal_length: f32, triangle: &Triangle3D) -> Triangle2D {
+        let vertices: Vec<Point2D> = triangle.vertices()
             .iter()
             .map(|vertex: &Point3D| {
                 let x_distance: f32 = vertex.distance_from_plane(&camera_planes.get(&PlaneDirection::YZ).unwrap());
@@ -92,11 +136,29 @@ impl Scene {
             .collect::<Vec<Point2D>>();
 
         let vertices: [Point2D; 3] = [
-            vertices[0],
-            vertices[1],
-            vertices[2],
+            Point2D {
+                x: vertices[0].x,
+                y: vertices[0].y,
+            },
+            Point2D {
+                x: vertices[1].x,
+                y: vertices[1].y,
+            },
+            Point2D {
+                x: vertices[2].x,
+                y: vertices[2].y,
+            }
         ];
 
         Triangle2D { vertices }
+    }
+
+    fn rasterize(&self, triangles: Vec<Triangle2D>, width: usize, height: usize) -> Vec<Pixel> {
+        let size: usize = width * height;
+        let buffer: Vec<Pixel> = Vec::with_capacity(size);
+
+
+
+        buffer
     }
 }

@@ -2,22 +2,36 @@ pub mod display;
 
 use std::collections::HashMap;
 use crate::renderer::scene::camera::display::Display;
-use crate::renderer::scene::object_3d::axis::Axis;
-use crate::renderer::scene::object_3d::plane::Plane;
-use crate::renderer::scene::object_3d::plane_direction::PlaneDirection;
-use crate::renderer::scene::object_3d::point::Point;
-use crate::renderer::scene::object_3d::vector::Vector;
+use crate::renderer::scene::model_3d::axis::Axis;
+use crate::renderer::scene::model_3d::plane::Plane;
+use crate::renderer::scene::model_3d::plane_direction::PlaneDirection;
+use crate::renderer::scene::model_3d::point::Point;
+use crate::renderer::scene::model_3d::vector::Vector;
 
 pub struct Camera {
-    pub focal_length: f32,
-    pub center: Point,
-    pub pitch_angle: f32, /* x axis */
-    pub yaw_angle: f32, /* y axis */
-    pub roll_angle: f32, /* z axis */
-    pub display: Display
+    focal_length: f32,
+    center: Point,
+    pitch_angle: f32, /* x axis */
+    yaw_angle: f32, /* y axis */
+    roll_angle: f32, /* z axis */
+    display: Display
 }
 
 impl Camera {
+    pub fn new(focal_length: f32,
+               center: Point,
+               pitch_angle: f32,
+               yaw_angle: f32,
+               roll_angle: f32,
+               display: Display) -> Camera {
+
+        Camera {
+            focal_length, center, pitch_angle, yaw_angle, roll_angle, display
+        }
+    }
+
+
+
     pub fn reposition(&mut self, delta: Vector) {
 
     }
@@ -54,5 +68,29 @@ impl Camera {
         planes.insert(PlaneDirection::XY, Plane::new(xy_plane_normal, self.center));
 
         return planes;
+    }
+
+    pub fn focal_length(&self) -> f32 {
+        self.focal_length
+    }
+
+    pub fn center(&self) -> &Point {
+        &self.center
+    }
+
+    pub fn pitch_angle(&self) -> f32 {
+        self.pitch_angle
+    }
+
+    pub fn yaw_angle(&self) -> f32 {
+        self.yaw_angle
+    }
+
+    pub fn roll_angle(&self) -> f32 {
+        self.roll_angle
+    }
+
+    pub fn display(&self) -> &Display {
+        &self.display
     }
 }

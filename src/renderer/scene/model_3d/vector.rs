@@ -1,5 +1,5 @@
 use std::f32::consts::PI;
-use crate::renderer::scene::object_3d::axis::Axis;
+use crate::renderer::scene::model_3d::axis::Axis;
 
 pub struct Vector {
     pub x: f32,

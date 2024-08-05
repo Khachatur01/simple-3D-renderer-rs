@@ -1,14 +1,10 @@
 pub mod coefficients;
 
-use crate::renderer::scene::object_3d::plane::coefficients::Coefficients;
-use crate::renderer::scene::object_3d::point::Point;
-use crate::renderer::scene::object_3d::vector::Vector;
+use crate::renderer::scene::model_3d::plane::coefficients::Coefficients;
+use crate::renderer::scene::model_3d::point::Point;
+use crate::renderer::scene::model_3d::vector::Vector;
 
 pub struct Plane {
-    /** normal vector of plane */
-    pub normal: Vector,
-    /** a point in plane */
-    pub point: Point,
     /** coefficients of plane equation */
     pub coefficients: Coefficients
 }
@@ -20,9 +16,15 @@ impl Plane {
         let d: f32 = a*point.x + b*point.y + c*point.z;
 
         Plane {
-            normal,
-            point,
             coefficients: Coefficients { a, b, c, d, }
+        }
+    }
+
+    pub fn get_normal(&self) -> Vector {
+        return Vector {
+            x: self.coefficients.a,
+            y: self.coefficients.b,
+            z: self.coefficients.c,
         }
     }
 }

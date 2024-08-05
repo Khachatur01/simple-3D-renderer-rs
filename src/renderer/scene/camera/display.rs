@@ -1,4 +1,13 @@
 pub struct Display {
-    pub width: f32,
-    pub height: f32,
+    width: usize,
+    height: usize,
+}
+
+impl Display {
+    pub fn new(width: usize,
+               height: usize) -> Display {
+        Display {
+            width, height
+        }
+    }
 }

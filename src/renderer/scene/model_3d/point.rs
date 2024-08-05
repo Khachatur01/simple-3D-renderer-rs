@@ -1,7 +1,9 @@
-use crate::renderer::scene::object_3d::plane::coefficients::Coefficients;
-use crate::renderer::scene::object_3d::plane::Plane;
+use serde::{Deserialize, Serialize};
+use crate::renderer::scene::model_3d::plane::coefficients::Coefficients;
+use crate::renderer::scene::model_3d::plane::Plane;
 
 #[derive(Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
