@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone)]
 #[derive(Serialize, Deserialize)]
 pub struct Coefficients {
     pub a: f32,

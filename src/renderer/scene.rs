@@ -2,15 +2,15 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::renderer::scene::camera::Camera;
-use crate::renderer::scene::model_2d::pixel::Pixel;
-use crate::renderer::scene::model_2d::point::Point as Point2D;
-use crate::renderer::scene::model_2d::triangle::Triangle as Triangle2D;
-use crate::renderer::scene::model_3d::mesh::Mesh;
-use crate::renderer::scene::model_3d::plane::Plane;
-use crate::renderer::scene::model_3d::plane_direction::PlaneDirection;
-use crate::renderer::scene::model_3d::point::Point as Point3D;
-use crate::renderer::scene::model_3d::triangle::Triangle as Triangle3D;
+use camera::Camera;
+use model_2d::pixel::Pixel;
+use model_2d::point::Point as Point2D;
+use model_2d::triangle::Triangle as Triangle2D;
+use model_3d::mesh::Mesh;
+use model_3d::plane::Plane;
+use model_3d::plane_direction::PlaneDirection;
+use model_3d::point::Point as Point3D;
+use model_3d::triangle::Triangle as Triangle3D;
 
 pub mod camera;
 pub mod model_2d;

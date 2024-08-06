@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::renderer::scene::model_3d::axis::Axis;
 
-#[derive(Copy, Clone)]
 #[derive(Serialize, Deserialize)]
 pub struct Vector {
     pub x: f32,

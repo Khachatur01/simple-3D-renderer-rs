@@ -7,8 +7,7 @@ pub struct Display {
 }
 
 impl Display {
-    pub fn new(width: usize,
-               height: usize) -> Display {
+    pub fn new(width: usize, height: usize) -> Display {
         Display {
             width, height
         }

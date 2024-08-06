@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::renderer::scene::model_3d::plane::coefficients::Coefficients;
+use coefficients::Coefficients;
+
 use crate::renderer::scene::model_3d::point::Point;
 use crate::renderer::scene::model_3d::vector::Vector;
 
