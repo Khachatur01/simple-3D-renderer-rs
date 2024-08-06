@@ -1,6 +1,11 @@
 use std::f32::consts::PI;
+
+use serde::{Deserialize, Serialize};
+
 use crate::renderer::scene::model_3d::axis::Axis;
 
+#[derive(Copy, Clone)]
+#[derive(Serialize, Deserialize)]
 pub struct Vector {
     pub x: f32,
     pub y: f32,
@@ -14,40 +19,44 @@ impl Vector {
         let sin_alpha: f32 = angle_radian.sin();
         let cos_alpha: f32 = angle_radian.cos();
 
-        // let Vector { x, y, z } = &self;
-
         match axis {
             Axis::X => {
                 /*
-                * |1     0           0| |x|   |        x        |   |x'|
-                * |0   cos θ    −sin θ| |y| = |y cos θ − z sin θ| = |y'|
-                * |0   sin θ     cos θ| |z|   |y sin θ + z cos θ|   |z'|
-                */
+                * |  0       0      1| |x|   |        x        |   |x'|
+                * |cos θ   −sin θ   0| |y|   |y cos θ − z sin θ|   |y'|
+                * |sin θ    cos θ   0| |z| = |y sin θ + z cos θ| = |z'|
+                * */
+                let y = self.y * cos_alpha - self.z * sin_alpha;
+                let z = self.y * sin_alpha + self.z * cos_alpha;
 
                 /* x stays the same */
-                self.y = self.y * cos_alpha - self.z * sin_alpha;
-                self.z = self.y * sin_alpha + self.z * cos_alpha;
+                self.y = y;
+                self.z = z;
             }
             Axis::Y => {
                 /*
                 * | cos θ    0   sin θ| |x|   | x cos θ + z sin θ|   |x'|
-                * |   0      1       0| |y| = |         y        | = |y'|
+                * |   0      y       0| |y| = |         y        | = |y'|
                 * |−sin θ    0   cos θ| |z|   |−x sin θ + z cos θ|   |z'|
                 * */
+                let x = self.x * cos_alpha + self.z * sin_alpha;
+                let z = -self.x * sin_alpha + self.z * cos_alpha;
 
-                self.x = self.x * cos_alpha + self.z * sin_alpha;
+                self.x = x;
                 /* y stays the same */
-                self.z = -self.x * sin_alpha + self.z * cos_alpha;
+                self.z = z;
             }
             Axis::Z => {
                 /*
-                * |cos θ   −sin θ   0| |x|   |x cos θ − y sin θ|   |x'|
-                * |sin θ    cos θ   0| |y| = |x sin θ + y cos θ| = |y'|
-                * |  0       0      1| |z|   |        z        |   |z'|
+                * |0   cos θ    −sin θ| |x| = |x cos θ − y sin θ| = |x'|
+                * |0   sin θ     cos θ| |y|   |x sin θ + y cos θ|   |y'|
+                * |1     0           0| |z|   |        z        |   |z'|
                 * */
+                let x = self.x * cos_alpha - self.y * sin_alpha;
+                let y = self.x * sin_alpha + self.y * cos_alpha;
 
-                self.x = self.x * cos_alpha - self.y * sin_alpha;
-                self.y = self.x * sin_alpha + self.y * cos_alpha;
+                self.x = x;
+                self.y = y;
                 /* z stays the same */
             }
         }

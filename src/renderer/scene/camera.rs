@@ -1,6 +1,7 @@
-pub mod display;
-
 use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
+
 use crate::renderer::scene::camera::display::Display;
 use crate::renderer::scene::model_3d::axis::Axis;
 use crate::renderer::scene::model_3d::plane::Plane;
@@ -8,6 +9,9 @@ use crate::renderer::scene::model_3d::plane_direction::PlaneDirection;
 use crate::renderer::scene::model_3d::point::Point;
 use crate::renderer::scene::model_3d::vector::Vector;
 
+pub mod display;
+
+#[derive(Serialize, Deserialize)]
 pub struct Camera {
     focal_length: f32,
     center: Point,
@@ -30,18 +34,28 @@ impl Camera {
         }
     }
 
+    pub fn reposition(&mut self, mut delta: Vector) {
+        delta.rotate(Axis::X, self.pitch_angle);
+        delta.rotate(Axis::Y, self.yaw_angle);
+        delta.rotate(Axis::Z, self.roll_angle);
 
-
-    pub fn reposition(&mut self, delta: Vector) {
-
+        self.center.x += delta.x;
+        self.center.y += delta.y;
+        self.center.z += delta.z;
     }
 
-    pub fn rotate(&mut self, delta: Vector) {
+    pub fn rotate(&mut self, delta: &Vector) {
+        self.pitch_angle += delta.x;
+        self.yaw_angle += delta.y;
+        self.roll_angle += delta.z;
 
+        self.pitch_angle %= 360.0;
+        self.yaw_angle %= 360.0;
+        self.roll_angle %= 360.0;
     }
 
-    pub fn move_focal_length(&mut self, delta: Vector) {
-
+    pub fn move_focal_length(&mut self, delta: f32) {
+        self.focal_length += delta;
     }
 
     pub fn create_planes(&self) -> HashMap<PlaneDirection, Plane> {

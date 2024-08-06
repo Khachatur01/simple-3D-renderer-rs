@@ -1,9 +1,10 @@
 use std::collections::HashMap;
+
 use uuid::Uuid;
 
 use crate::renderer::scene::camera::Camera;
 use crate::renderer::scene::model_2d::pixel::Pixel;
-use crate::renderer::scene::model_2d::point::{Point as Point2D};
+use crate::renderer::scene::model_2d::point::Point as Point2D;
 use crate::renderer::scene::model_2d::triangle::Triangle as Triangle2D;
 use crate::renderer::scene::model_3d::mesh::Mesh;
 use crate::renderer::scene::model_3d::plane::Plane;
@@ -121,7 +122,7 @@ impl Scene {
                 let y_distance: f32 = vertex.distance_from_plane(&camera_planes.get(&PlaneDirection::XZ).unwrap());
                 let z_distance: f32 = vertex.distance_from_plane(&camera_planes.get(&PlaneDirection::XY).unwrap());
 
-                if x_distance == 0.0 {
+                if z_distance == 0.0 {
                     return Point2D {
                         x: vertex.x,
                         y: vertex.y,

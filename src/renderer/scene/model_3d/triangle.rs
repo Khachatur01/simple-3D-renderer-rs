@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+
 use crate::renderer::scene::model_3d::point::Point;
 
 pub type TriangleVertices = [Point; 3];

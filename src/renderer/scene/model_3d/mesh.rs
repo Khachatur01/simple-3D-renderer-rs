@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
+
 use crate::renderer::scene::model_3d::point::Point;
 use crate::renderer::scene::model_3d::triangle::Triangle;
 use crate::renderer::scene::model_3d::vector::Vector;
-
 
 #[derive(Serialize, Deserialize)]
 pub struct Mesh {
