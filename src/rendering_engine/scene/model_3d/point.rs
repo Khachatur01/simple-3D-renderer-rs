@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::renderer::scene::model_3d::plane::coefficients::Coefficients;
-use crate::renderer::scene::model_3d::plane::Plane;
+use crate::rendering_engine::scene::model_3d::plane::coefficients::Coefficients;
+use crate::rendering_engine::scene::model_3d::plane::Plane;
 
 #[derive(Debug, Copy, Clone)]
 #[derive(Serialize, Deserialize)]

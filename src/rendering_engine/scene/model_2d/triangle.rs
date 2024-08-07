@@ -1,13 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::renderer::scene::model_3d::point::Point;
+use crate::rendering_engine::scene::model_2d::point::Point;
 
 pub type TriangleVertices = [Point; 3];
 
-
 #[derive(Serialize, Deserialize)]
 pub struct Triangle {
-    vertices: TriangleVertices
+    pub vertices: TriangleVertices
 }
 
 impl Triangle {
@@ -15,9 +14,5 @@ impl Triangle {
         Triangle {
             vertices
         }
-    }
-
-    pub fn vertices(&self) -> TriangleVertices {
-        self.vertices
     }
 }

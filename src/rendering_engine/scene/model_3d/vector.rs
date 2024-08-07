@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use serde::{Deserialize, Serialize};
 
-use crate::renderer::scene::model_3d::axis::Axis;
+use crate::rendering_engine::scene::model_3d::axis::Axis;
 
 #[derive(Serialize, Deserialize)]
 pub struct Vector {

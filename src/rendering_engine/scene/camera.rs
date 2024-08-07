@@ -2,12 +2,12 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::renderer::scene::camera::display::Display;
-use crate::renderer::scene::model_3d::axis::Axis;
-use crate::renderer::scene::model_3d::plane::Plane;
-use crate::renderer::scene::model_3d::plane_direction::PlaneDirection;
-use crate::renderer::scene::model_3d::point::Point;
-use crate::renderer::scene::model_3d::vector::Vector;
+use crate::rendering_engine::scene::camera::display::Display;
+use crate::rendering_engine::scene::model_3d::axis::Axis;
+use crate::rendering_engine::scene::model_3d::plane::Plane;
+use crate::rendering_engine::scene::model_3d::plane_direction::PlaneDirection;
+use crate::rendering_engine::scene::model_3d::point::Point;
+use crate::rendering_engine::scene::model_3d::vector::Vector;
 
 pub mod display;
 
@@ -75,7 +75,7 @@ impl Camera {
         xy_plane_normal.rotate(Axis::Y, self.yaw_angle);
         xy_plane_normal.rotate(Axis::Z, self.roll_angle);
 
-        let mut planes = HashMap::with_capacity(3);
+        let mut planes: HashMap<PlaneDirection, Plane> = HashMap::with_capacity(3);
 
         planes.insert(PlaneDirection::YZ, Plane::new(yz_plane_normal, self.center));
         planes.insert(PlaneDirection::XZ, Plane::new(xz_plane_normal, self.center));

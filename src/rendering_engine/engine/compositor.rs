@@ -1,0 +1,63 @@
+use crate::rendering_engine::engine::pixel::Pixel;
+use crate::rendering_engine::engine::z_bufferizer::ZBuffer;
+
+pub type Image = Vec<Vec<Pixel>>;
+
+pub fn composite(z_buffers: Vec<ZBuffer>) -> Image {
+    vec![
+        vec![
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+            Pixel::new(255, 0, 0, 255),
+        ]
+    ]
+}

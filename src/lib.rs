@@ -2,14 +2,14 @@ use uuid::Uuid;
 use wasm_bindgen::JsValue;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::renderer::Renderer;
-use crate::renderer::scene::camera::Camera;
-use crate::renderer::scene::camera::display::Display;
-use crate::renderer::scene::model_2d::triangle::Triangle as Triangle2D;
-use crate::renderer::scene::model_3d::point::Point as Point3D;
-use crate::renderer::scene::model_3d::vector::Vector as Vector3D;
+use crate::rendering_engine::RenderingEngine;
+use crate::rendering_engine::scene::camera::Camera;
+use crate::rendering_engine::scene::camera::display::Display;
+use crate::rendering_engine::scene::model_2d::triangle::Triangle as Triangle2D;
+use crate::rendering_engine::scene::model_3d::point::Point as Point3D;
+use crate::rendering_engine::scene::model_3d::vector::Vector as Vector3D;
 
-mod renderer;
+mod rendering_engine;
 
 #[wasm_bindgen]
 extern "C" {
@@ -17,16 +17,16 @@ extern "C" {
     fn log(s: &str);
 }
 
-static mut RENDERERS: Vec<Renderer> = vec![];
+static mut RENDERING_ENGINES: Vec<RenderingEngine> = vec![];
 
 #[wasm_bindgen]
 pub unsafe fn init_renderer() {
-    RENDERERS.push(Renderer::new());
+    RENDERING_ENGINES.push(RenderingEngine::new());
 }
 
 #[wasm_bindgen]
 pub unsafe fn init_scene() -> String {
-    RENDERERS[0].create_scene().to_string()
+    RENDERING_ENGINES[0].create_scene().to_string()
 }
 
 #[wasm_bindgen]
@@ -36,7 +36,7 @@ pub unsafe fn add_camera(scene_id: String) -> String {
     let width: usize = 800;
     let height: usize = 800;
 
-    RENDERERS[0]
+    RENDERING_ENGINES[0]
         .get_scene(scene_id).unwrap()
         .add_camera(Camera::new(
             (width as f32) * 2.0,
@@ -53,7 +53,7 @@ pub unsafe fn add_camera(scene_id: String) -> String {
 pub unsafe fn add_mesh(scene_id: String) -> String {
     let scene_id: Uuid = Uuid::parse_str(scene_id.as_str()).unwrap();
 
-    RENDERERS[0]
+    RENDERING_ENGINES[0]
         .get_scene(scene_id).unwrap()
         .add_mesh(
             vec![
@@ -73,7 +73,7 @@ pub unsafe fn add_cube(scene_id: String, position: JsValue, width: f32, height: 
 
     let position: Point3D = serde_wasm_bindgen::from_value(position).unwrap();
 
-    RENDERERS[0].get_scene(scene_id).unwrap().add_cube(
+    RENDERING_ENGINES[0].get_scene(scene_id).unwrap().add_cube(
         position,
         width, height, length
     ).to_string()
@@ -86,9 +86,9 @@ pub unsafe fn move_camera(scene_id: String, camera_id: String, delta: JsValue) {
 
     let delta: Vector3D = serde_wasm_bindgen::from_value(delta).unwrap();
 
-    RENDERERS[0]
+    RENDERING_ENGINES[0]
         .get_scene(scene_id).unwrap()
-        .get_camera(camera_id).unwrap()
+        .get_camera_mut(camera_id).unwrap()
         .reposition(delta);
 }
 
@@ -98,9 +98,9 @@ pub unsafe fn get_camera(scene_id: String, camera_id: String) -> JsValue {
     let camera_id: Uuid = Uuid::parse_str(camera_id.as_str()).unwrap();
 
     serde_wasm_bindgen::to_value(
-        RENDERERS[0]
+        RENDERING_ENGINES[0]
             .get_scene(scene_id).unwrap()
-            .get_camera(camera_id).unwrap()
+            .get_camera_mut(camera_id).unwrap()
     ).unwrap()
 }
 
@@ -111,9 +111,9 @@ pub unsafe fn rotate_camera(scene_id: String, camera_id: String, delta: JsValue)
 
     let delta: Vector3D = serde_wasm_bindgen::from_value(delta).unwrap();
 
-    RENDERERS[0]
+    RENDERING_ENGINES[0]
         .get_scene(scene_id).unwrap()
-        .get_camera(camera_id).unwrap()
+        .get_camera_mut(camera_id).unwrap()
         .rotate(&delta);
 }
 
@@ -122,9 +122,9 @@ pub unsafe fn move_camera_focal_length(scene_id: String, camera_id: String, delt
     let scene_id: Uuid = Uuid::parse_str(scene_id.as_str()).unwrap();
     let camera_id: Uuid = Uuid::parse_str(camera_id.as_str()).unwrap();
 
-    RENDERERS[0]
+    RENDERING_ENGINES[0]
         .get_scene(scene_id).unwrap()
-        .get_camera(camera_id).unwrap()
+        .get_camera_mut(camera_id).unwrap()
         .move_focal_length(delta);
 }
 
@@ -133,9 +133,16 @@ pub unsafe fn render(scene_id: String, camera_id: String) -> JsValue {
     let scene_id: Uuid = Uuid::parse_str(scene_id.as_str()).unwrap();
     let camera_id: Uuid = Uuid::parse_str(camera_id.as_str()).unwrap();
 
-    let triangles: Vec<Triangle2D> = RENDERERS[0]
+    let triangles: Vec<Triangle2D> = RENDERING_ENGINES[0]
         .get_scene(scene_id).unwrap()
         .render(camera_id).unwrap();
 
     serde_wasm_bindgen::to_value(&triangles).unwrap()
+}
+#[wasm_bindgen]
+pub unsafe fn render_new(scene_id: String, camera_id: String) -> JsValue {
+    let scene_id: Uuid = Uuid::parse_str(scene_id.as_str()).unwrap();
+    let camera_id: Uuid = Uuid::parse_str(camera_id.as_str()).unwrap();
+
+    serde_wasm_bindgen::to_value(&RENDERING_ENGINES[0].render(scene_id, camera_id)).unwrap()
 }

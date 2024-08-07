@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use coefficients::Coefficients;
 
-use crate::renderer::scene::model_3d::point::Point;
-use crate::renderer::scene::model_3d::vector::Vector;
+use crate::rendering_engine::scene::model_3d::point::Point;
+use crate::rendering_engine::scene::model_3d::vector::Vector;
 
 pub mod coefficients;
 

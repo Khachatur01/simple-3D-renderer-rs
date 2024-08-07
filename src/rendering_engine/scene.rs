@@ -1,9 +1,9 @@
+use std::collections::hash_map::Values;
 use std::collections::HashMap;
 
 use uuid::Uuid;
 
 use camera::Camera;
-use model_2d::pixel::Pixel;
 use model_2d::point::Point as Point2D;
 use model_2d::triangle::Triangle as Triangle2D;
 use model_3d::mesh::Mesh;
@@ -11,6 +11,8 @@ use model_3d::plane::Plane;
 use model_3d::plane_direction::PlaneDirection;
 use model_3d::point::Point as Point3D;
 use model_3d::triangle::Triangle as Triangle3D;
+
+use crate::rendering_engine::engine::pixel::Pixel;
 
 pub mod camera;
 pub mod model_2d;
@@ -21,15 +23,31 @@ pub type MeshID = Uuid;
 
 pub struct Scene {
     cameras: HashMap<CameraID, Camera>,
-    objects: HashMap<MeshID, Mesh>
+    meshes: HashMap<MeshID, Mesh>
 }
 
 impl Scene {
     pub fn new() -> Scene {
         Scene {
             cameras: HashMap::new(),
-            objects: HashMap::new()
+            meshes: HashMap::new()
         }
+    }
+
+    pub fn get_camera(&self, camera_id: CameraID) -> Option<&Camera> {
+        self.cameras.get(&camera_id)
+    }
+
+    pub fn get_camera_mut(&mut self, camera_id: CameraID) -> Option<&mut Camera> {
+        self.cameras.get_mut(&camera_id)
+    }
+
+    pub fn get_mesh(&self, mesh_id: MeshID) -> Option<&Mesh> {
+        self.meshes.get(&mesh_id)
+    }
+
+    pub fn get_all_meshes(&self) -> Values<'_, MeshID, Mesh> {
+        self.meshes.values()
     }
 
     pub fn add_camera(&mut self, camera: Camera) -> CameraID {
@@ -40,18 +58,10 @@ impl Scene {
         return camera_id;
     }
 
-    pub fn get_camera(&mut self, camera_id: CameraID) -> Option<&mut Camera> {
-        self.cameras.get_mut(&camera_id)
-    }
-
-    pub fn get_mesh(&self, mesh_id: MeshID) -> Option<&Mesh> {
-        self.objects.get(&mesh_id)
-    }
-
     pub fn add_mesh(&mut self, points: Vec<Point3D>, faces: Vec<[usize; 3]>) -> MeshID {
         let object_id: MeshID = Uuid::new_v4();
 
-        self.objects.insert(object_id, Mesh { points, faces });
+        self.meshes.insert(object_id, Mesh { points, faces });
 
         object_id
     }
@@ -95,12 +105,12 @@ impl Scene {
         self.add_mesh(points, faces)
     }
 
-    pub fn render(&self, camera_id: CameraID) -> Result<Vec<Triangle2D>, &str> {
+    pub(crate) fn render(&self, camera_id: CameraID) -> Result<Vec<Triangle2D>, &str> {
         let camera: &Camera = self.cameras.get(&camera_id).ok_or("Camera not found")?;
 
         let camera_planes: HashMap<PlaneDirection, Plane> = camera.create_planes();
 
-        let triangles2d: Vec<Triangle2D> = self.objects
+        let triangles2d: Vec<Triangle2D> = self.meshes
             .iter()
             .map(|entry| entry.1)
             .map(|mesh: &Mesh| mesh.triangulate())
@@ -154,7 +164,7 @@ impl Scene {
         Triangle2D { vertices }
     }
 
-    fn rasterize(&self, triangles: Vec<Triangle2D>, width: usize, height: usize) -> Vec<Pixel> {
+    fn rasterize(triangles: Vec<Triangle2D>, width: usize, height: usize) -> Vec<Pixel> {
         let size: usize = width * height;
         let buffer: Vec<Pixel> = Vec::with_capacity(size);
 
