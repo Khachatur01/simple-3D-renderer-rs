@@ -8,8 +8,6 @@ use crate::rendering_engine::engine::compositor::Image;
 use crate::rendering_engine::engine::renderer::render;
 use crate::rendering_engine::scene::camera::Camera;
 use crate::rendering_engine::scene::CameraID;
-use crate::rendering_engine::scene::model_3d::plane::Plane;
-use crate::rendering_engine::scene::model_3d::plane_direction::PlaneDirection;
 
 pub mod scene;
 mod engine;
@@ -44,8 +42,6 @@ impl RenderingEngine {
         let scene: &Scene = self.scenes.get(&scene_id).unwrap();
         let camera: &Camera = scene.get_camera(camera_id).unwrap();
 
-        let camera_planes: HashMap<PlaneDirection, Plane> = camera.create_planes();
-
-        render(camera_planes, camera.focal_length(), scene.get_all_meshes())
+        render(camera, scene.get_all_meshes())
     }
 }

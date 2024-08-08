@@ -5,3 +5,4 @@ pub mod plane;
 pub mod axis;
 pub mod plane_direction;
 pub mod mesh;
+pub mod face;

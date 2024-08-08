@@ -5,7 +5,9 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use crate::rendering_engine::RenderingEngine;
 use crate::rendering_engine::scene::camera::Camera;
 use crate::rendering_engine::scene::camera::display::Display;
+use crate::rendering_engine::scene::model::color::Color;
 use crate::rendering_engine::scene::model_2d::triangle::Triangle as Triangle2D;
+use crate::rendering_engine::scene::model_3d::face::Face;
 use crate::rendering_engine::scene::model_3d::point::Point as Point3D;
 use crate::rendering_engine::scene::model_3d::vector::Vector as Vector3D;
 
@@ -62,7 +64,7 @@ pub unsafe fn add_mesh(scene_id: String) -> String {
                 Point3D { x: 50.0, y: 0.0, z: 250.0 }, /* top right */
             ],
             vec![
-                [0, 1, 2]
+                Face::new([0, 1, 2], Color::new(255, 0, 0, 120))
             ]
         ).to_string()
 }
@@ -75,7 +77,8 @@ pub unsafe fn add_cube(scene_id: String, position: JsValue, width: f32, height: 
 
     RENDERING_ENGINES[0].get_scene(scene_id).unwrap().add_cube(
         position,
-        width, height, length
+        width, height, length,
+        Color::new(255, 0, 0, 120)
     ).to_string()
 }
 

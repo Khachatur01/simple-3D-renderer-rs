@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::rendering_engine::scene::model_3d::face::Face;
 use crate::rendering_engine::scene::model_3d::point::Point;
 use crate::rendering_engine::scene::model_3d::triangle::Triangle;
 use crate::rendering_engine::scene::model_3d::vector::Vector;
@@ -7,7 +8,7 @@ use crate::rendering_engine::scene::model_3d::vector::Vector;
 #[derive(Serialize, Deserialize)]
 pub struct Mesh {
     pub points: Vec<Point>,
-    pub faces: Vec<[usize; 3]>,
+    pub faces: Vec<Face>,
 }
 
 impl Mesh {
@@ -21,12 +22,12 @@ impl Mesh {
 
     pub fn triangulate(&self) -> Vec<Triangle> {
         self.faces.iter()
-            .map(|face: &[usize; 3]| {
+            .map(|face: &Face| {
                 Triangle::new([
-                    self.points[face[0]],
-                    self.points[face[1]],
-                    self.points[face[2]]
-                ])
+                    self.points[face.vertices[0]],
+                    self.points[face.vertices[1]],
+                    self.points[face.vertices[2]]
+                ], face.color)
             })
             .collect()
     }
