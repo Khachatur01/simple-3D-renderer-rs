@@ -10,7 +10,7 @@ use crate::rendering_engine::scene::camera::Camera;
 use crate::rendering_engine::scene::CameraID;
 
 pub mod scene;
-mod engine;
+pub mod engine;
 
 pub type SceneId = Uuid;
 

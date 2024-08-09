@@ -1,8 +1,5 @@
-use std::ops::RangeInclusive;
-
 use serde::{Deserialize, Serialize};
 
-use crate::log;
 use crate::rendering_engine::engine::depth_pixel::DepthPixel;
 use crate::rendering_engine::engine::pixel::Pixel;
 use crate::rendering_engine::scene::model::color::Color;
@@ -74,125 +71,55 @@ pub fn rasterize(triangle2d: &Triangle2D, triangle3d: &Triangle3D) -> ZBuffer {
 }
 
 /** brightness is a value from 0 to 1 */
-fn set_pixel(x: usize, y: usize, color: Color, pixel_buffer: &mut DepthPixelBuffer) {
-    if y >= pixel_buffer.len() || x >= pixel_buffer[0].len() {
-        log(format!("{y}, {x} is out of range").as_str());
+fn set_pixel(col: isize, row: isize, color: Color, pixel_buffer: &mut DepthPixelBuffer) {
+    let col: isize = (pixel_buffer[0].len() / 2) as isize + col;
+    let row: isize = (pixel_buffer.len() / 2) as isize - row;
+
+    let col: usize = col as usize;
+    let row: usize = row as usize;
+
+    if row >= pixel_buffer.len() || col >= pixel_buffer[0].len() {
         return;
     }
-    // log(format!("{y}, {x} is in range").as_str());
 
-    pixel_buffer[y][x] = DepthPixel {
+    pixel_buffer[row][col] = DepthPixel {
         pixel: Pixel::new(color.r, color.g, color.b, color.a),
         depth: 1.0 /* @FIXME */
     }
-}
-
-fn i_part(number: f32) -> f32 {
-    number.ceil()
-}
-fn f_part(number: f32) -> f32 {
-    number - i_part(number)
-}
-fn rf_part(number: f32) -> f32 {
-    1.0 - f_part(number)
 }
 
 fn draw_line(mut point0: Point2D, point0depth: f32,
              mut point1: Point2D, point1depth: f32,
              color: Color,
              pixel_buffer: &mut DepthPixelBuffer) {
+    let dx = point1.x - point0.x;
+    let dy = point1.y - point0.y;
 
-    let steep: bool = (point1.y - point0.y).abs() > (point1.x - point0.x).abs();
-    // const steep = Math.abs(y1 - y0) > Math.abs(x1 - x0);
+    if dx > dy {
+        let m = dy / dx;
 
+        for x in point0.x as isize..=point1.x as isize {
+            let y = if m == 0.0 {
+                0.0
+            } else {
+                m * (x as f32 - point0.x) + point0.y
+            };
 
-    log(serde_json::to_string(&point0).unwrap().as_str());
-    log(serde_json::to_string(&point1).unwrap().as_str());
-
-    if steep {
-        (point0.x, point0.y) = (point0.y, point0.x);
-        (point1.x, point1.y) = (point1.y, point1.x);
-        log("steep");
-    }
-    // if (steep) {
-    //     [x0, y0] = [y0, x0];
-    //     [x1, y1] = [y1, x1];
-    // }
-
-    if point0.x > point1.x {
-        (point0.x, point1.x) = (point1.x, point0.x);
-        (point0.y, point1.y) = (point1.y, point0.y);
-        log("steep2");
-    }
-    // if (x0 > x1) {
-    //     [x0, x1] = [x1, x0];
-    //     [y0, y1] = [y1, y0];
-    // }
-
-    log(serde_json::to_string(&point0).unwrap().as_str());
-    log(serde_json::to_string(&point1).unwrap().as_str());
-
-    let dx: f32 = point1.x - point0.x;
-    let dy: f32 = point1.y - point0.y;
-    let gradient: f32 = if dx == 0.0 || dy == 0.0 {
-        1.0
-    } else {
-        dy / dx
-    };
-
-    // const dx = x1 - x0;
-    // const dy = y1 - y0;
-    // const gradient = dy / dx || 1;
-
-    let range: RangeInclusive<usize> = point0.x.floor() as usize..=point1.x.floor() as usize;
-    let mut intersect_y: f32 = point0.y;
-    log(serde_json::to_string(&range).unwrap().as_str());
-
-    // let xpxl1 = Math.floor(x0);
-    // let xpxl2 = Math.floor(x1);
-    // let intersectY = y0;
-
-    if steep {
-        for x in range {
-            let mut color: Color = color.clone();
-
-            color.a = (rf_part(intersect_y) * 256.0) as u8;
-            set_pixel(intersect_y.floor() as usize, x, color, pixel_buffer);
-
-            color.a = (f_part(intersect_y) * 256.0) as u8;
-            set_pixel((intersect_y.floor() - 1.0) as usize, x, color, pixel_buffer);
-
-            intersect_y += gradient;
+            set_pixel(x, y as isize, color, pixel_buffer);
         }
     } else {
-        for x in range {
-            let mut color: Color = color.clone();
+        let m = dx / dy;
 
-            color.a = (rf_part(intersect_y) * 256.0) as u8;
-            set_pixel(x, intersect_y.floor() as usize, color, pixel_buffer);
+        for y in point0.y as isize..=point1.y as isize {
+            let x = if m == 0.0 {
+                0.0
+            } else {
+                (-y as f32 - m*point0.x + point0.y) / m
+            };
 
-            color.a = (f_part(intersect_y) * 256.0) as u8;
-            set_pixel(x, (intersect_y.floor() - 1.0) as usize, color, pixel_buffer);
-
-            intersect_y += gradient;
+            set_pixel(x as isize, y, color, pixel_buffer);
         }
     }
-    //
-    // if (steep) {
-    //     for (let x = xpxl1; x <= xpxl2; x++) {
-    //         drawPixel(ctx, Math.floor(intersectY), x, rfPartOfNumber(intersectY));
-    //         drawPixel(ctx, Math.floor(intersectY) - 1, x, fPartOfNumber(intersectY));
-    //         intersectY += gradient;
-    //     }
-    // } else {
-    //     for (let x = xpxl1; x <= xpxl2; x++) {
-    //         drawPixel(ctx, x, Math.floor(intersectY), rfPartOfNumber(intersectY));
-    //         drawPixel(ctx, x, Math.floor(intersectY) - 1, fPartOfNumber(intersectY));
-    //         intersectY += gradient;
-    //     }
-    // }
-
-    log("\n\n\n");
 }
 
 fn create_bounding_box(triangle2d: &Triangle2D) -> (f32, f32, f32, f32) {

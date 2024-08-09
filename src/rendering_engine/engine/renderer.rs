@@ -1,7 +1,6 @@
 use std::collections::hash_map::Values;
 use std::collections::HashMap;
 
-use crate::log;
 use crate::rendering_engine::engine::compositor::{composite, Image};
 use crate::rendering_engine::engine::projector::project;
 use crate::rendering_engine::engine::rasterizer::{rasterize, ZBuffer};
@@ -23,7 +22,6 @@ pub fn render(camera: &Camera, meshes: Values<MeshID, Mesh>) -> Image {
         .iter()
         .map(|triangle3d: &Triangle3D| {
             let triangle2d: Triangle2D = project(&camera_planes, camera.focal_length(), &triangle3d);
-            log(serde_json::to_string(&triangle2d).unwrap().as_str());
 
             rasterize(&triangle2d, triangle3d)
         })

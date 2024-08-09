@@ -27,10 +27,14 @@ fn composite_pixel(row: usize, col: usize, z_buffers: &Vec<ZBuffer>) -> Pixel {
     let mut pixel: Pixel = Pixel::default();
 
     for z_buffer in z_buffers {
-        let a = z_buffer.buffer.get(row + z_buffer.y).map(|row_pixels| row_pixels.get(col + z_buffer.x));
+        let a = z_buffer.buffer
+            .get(row + z_buffer.y)
+            .map(|row_pixels| row_pixels.get(col + z_buffer.x));
 
         if let Some(Some(depth_pixel)) = a {
-            return depth_pixel.pixel.clone();
+            if depth_pixel.pixel.color.a != 0 {
+                return depth_pixel.pixel.clone();
+            }
         }
     }
 
