@@ -17,6 +17,9 @@ serde-wasm-bindgen = "0.6.5"
 serde = { version = "1.0.204", features = ["derive"] }
 log = "0.4.22"
 
+bresenham = "0.1.1"
+line_drawing = "1.0.0"
+
 [dependencies.uuid]
 version = "1.10.0"
 features = [

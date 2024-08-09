@@ -1,13 +1,18 @@
+use line_drawing::XiaolinWu;
 use serde::{Deserialize, Serialize};
 
 use crate::rendering_engine::engine::depth_pixel::DepthPixel;
 use crate::rendering_engine::engine::pixel::Pixel;
+use crate::rendering_engine::engine::z_buffered_triangle::{ZBufferedTriangle, ZBufferedVertex};
 use crate::rendering_engine::scene::model::color::Color;
-use crate::rendering_engine::scene::model_2d::point::Point as Point2D;
-use crate::rendering_engine::scene::model_2d::triangle::Triangle as Triangle2D;
-use crate::rendering_engine::scene::model_3d::triangle::Triangle as Triangle3D;
 
 pub type DepthPixelBuffer = Vec<Vec<DepthPixel>>;
+
+/**
+    Values:
+    x, y, width, height
+ */
+type BoundingBox = (f32, f32, f32, f32);
 
 #[derive(Serialize, Deserialize)]
 pub struct ZBuffer {
@@ -16,50 +21,53 @@ pub struct ZBuffer {
     pub y: usize,
 }
 
-pub fn rasterize(triangle2d: &Triangle2D, triangle3d: &Triangle3D) -> ZBuffer {
-    let (x, y, width, height) = create_bounding_box(triangle2d);
-    let buffer_width: usize = (width.ceil() + 1.0) as usize;
-    let buffer_height: usize = (height.ceil() + 1.0) as usize;
+pub fn rasterize(z_buffered_triangle: &ZBufferedTriangle) -> ZBuffer {
+    let (x, y, width, height) = create_bounding_box(z_buffered_triangle);
+    let buffer_width: usize = width.ceil() as usize;
+    let buffer_height: usize = height.ceil() as usize;
 
     let mut pixel_buffer: DepthPixelBuffer =
         vec![
-            vec![DepthPixel::default(); buffer_width];
-            buffer_height
+            vec![DepthPixel::default(); buffer_width + 1];
+            buffer_height + 1
         ];
 
-    let relative_point0 = Point2D {
-        x: triangle2d.vertices[0].x - x,
-        y: triangle2d.vertices[0].y - y,
+    let relative_vertex0 = ZBufferedVertex {
+        x: z_buffered_triangle.vertices[0].x - x,
+        y: z_buffered_triangle.vertices[0].y - y,
+        distance: z_buffered_triangle.vertices[0].distance
     };
 
-    let relative_point1 = Point2D {
-        x: triangle2d.vertices[1].x - x,
-        y: triangle2d.vertices[1].y - y,
+    let relative_vertex1 = ZBufferedVertex {
+        x: z_buffered_triangle.vertices[1].x - x,
+        y: z_buffered_triangle.vertices[1].y - y,
+        distance: z_buffered_triangle.vertices[1].distance
     };
 
-    let relative_point2 = Point2D {
-        x: triangle2d.vertices[2].x - x,
-        y: triangle2d.vertices[2].y - y,
+    let relative_vertex2 = ZBufferedVertex {
+        x: z_buffered_triangle.vertices[2].x - x,
+        y: z_buffered_triangle.vertices[2].y - y,
+        distance: z_buffered_triangle.vertices[2].distance
     };
 
     draw_line(
-        relative_point0, triangle3d.vertices()[0].z,
-        relative_point1, triangle3d.vertices()[1].z,
-        triangle3d.color(),
+        relative_vertex0,
+        relative_vertex1,
+        z_buffered_triangle.color,
         &mut pixel_buffer
     );
 
     draw_line(
-        relative_point1, triangle3d.vertices()[1].z,
-        relative_point2, triangle3d.vertices()[2].z,
-        triangle3d.color(),
+        relative_vertex1,
+        relative_vertex2,
+        z_buffered_triangle.color,
         &mut pixel_buffer
     );
 
     draw_line(
-        relative_point2, triangle3d.vertices()[2].z,
-        relative_point0, triangle3d.vertices()[0].z,
-        triangle3d.color(),
+        relative_vertex2,
+        relative_vertex0,
+        z_buffered_triangle.color,
         &mut pixel_buffer
     );
 
@@ -70,14 +78,44 @@ pub fn rasterize(triangle2d: &Triangle2D, triangle3d: &Triangle3D) -> ZBuffer {
     }
 }
 
+fn draw_line(point0: ZBufferedVertex,
+             point1: ZBufferedVertex,
+             color: Color,
+             pixel_buffer: &mut DepthPixelBuffer) {
+
+    for ((x, y), value) in XiaolinWu::<f32, isize>::new((point0.x, point0.y), (point1.x, point1.y)) {
+        set_pixel(x as usize, y as usize,
+                  Color::new(color.r, color.g, color.b, (color.a as f32 * value) as u8),
+                  pixel_buffer
+        );
+    }
+}
+
+fn create_bounding_box(z_buffered_triangle: &ZBufferedTriangle) -> (f32, f32, f32, f32) {
+    let bounding_box: BoundingBox = z_buffered_triangle.vertices
+        .iter()
+        .fold((f32::MAX, f32::MAX, f32::MIN, f32::MIN), |bounding_box: BoundingBox, vertex: &ZBufferedVertex| {
+            (
+                f32::min(vertex.x, bounding_box.0),
+                f32::min(vertex.y, bounding_box.1),
+                f32::max(vertex.x, bounding_box.2),
+                f32::max(vertex.y, bounding_box.3),
+            )
+        });
+
+    (
+        /* x */         /* y */
+        bounding_box.0, bounding_box.1,
+        /* width */
+        bounding_box.2 - bounding_box.0,
+        /* height */
+        bounding_box.3 - bounding_box.1
+    )
+}
+
+
 /** brightness is a value from 0 to 1 */
-fn set_pixel(col: isize, row: isize, color: Color, pixel_buffer: &mut DepthPixelBuffer) {
-    let col: isize = (pixel_buffer[0].len() / 2) as isize + col;
-    let row: isize = (pixel_buffer.len() / 2) as isize - row;
-
-    let col: usize = col as usize;
-    let row: usize = row as usize;
-
+fn set_pixel(col: usize, row: usize, color: Color, pixel_buffer: &mut DepthPixelBuffer) {
     if row >= pixel_buffer.len() || col >= pixel_buffer[0].len() {
         return;
     }
@@ -86,63 +124,4 @@ fn set_pixel(col: isize, row: isize, color: Color, pixel_buffer: &mut DepthPixel
         pixel: Pixel::new(color.r, color.g, color.b, color.a),
         depth: 1.0 /* @FIXME */
     }
-}
-
-fn draw_line(mut point0: Point2D, point0depth: f32,
-             mut point1: Point2D, point1depth: f32,
-             color: Color,
-             pixel_buffer: &mut DepthPixelBuffer) {
-    let dx = point1.x - point0.x;
-    let dy = point1.y - point0.y;
-
-    if dx > dy {
-        let m = dy / dx;
-
-        for x in point0.x as isize..=point1.x as isize {
-            let y = if m == 0.0 {
-                0.0
-            } else {
-                m * (x as f32 - point0.x) + point0.y
-            };
-
-            set_pixel(x, y as isize, color, pixel_buffer);
-        }
-    } else {
-        let m = dx / dy;
-
-        for y in point0.y as isize..=point1.y as isize {
-            let x = if m == 0.0 {
-                0.0
-            } else {
-                (-y as f32 - m*point0.x + point0.y) / m
-            };
-
-            set_pixel(x as isize, y, color, pixel_buffer);
-        }
-    }
-}
-
-fn create_bounding_box(triangle2d: &Triangle2D) -> (f32, f32, f32, f32) {
-    let mut min_x: f32 = triangle2d.vertices[0].x;
-    let mut min_y: f32 = triangle2d.vertices[0].y;
-    let mut max_x: f32 = triangle2d.vertices[0].x;
-    let mut max_y: f32 = triangle2d.vertices[0].y;
-
-    for point in triangle2d.vertices.iter() {
-        if point.x < min_x {
-            min_x = point.x;
-        }
-        if point.x > max_x {
-            max_x = point.x;
-        }
-
-        if point.y < min_y {
-            min_y = point.y;
-        }
-        if point.y > max_y {
-            max_y = point.y;
-        }
-    }
-
-    (min_x, min_y, max_x - min_x, max_y - min_y)
 }

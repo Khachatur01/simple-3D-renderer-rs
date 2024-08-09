@@ -8,6 +8,7 @@ use crate::rendering_engine::engine::compositor::Image;
 use crate::rendering_engine::engine::renderer::render;
 use crate::rendering_engine::scene::camera::Camera;
 use crate::rendering_engine::scene::CameraID;
+use crate::rendering_engine::scene::model::color::Color;
 
 pub mod scene;
 pub mod engine;
@@ -38,10 +39,10 @@ impl RenderingEngine {
         self.scenes.get_mut(&scene_id)
     }
 
-    pub fn render(&self, scene_id: SceneId, camera_id: CameraID) -> Image {
+    pub fn render(&self, scene_id: SceneId, camera_id: CameraID, background_color: Color) -> Image {
         let scene: &Scene = self.scenes.get(&scene_id).unwrap();
         let camera: &Camera = scene.get_camera(camera_id).unwrap();
 
-        render(camera, scene.get_all_meshes())
+        render(camera, scene.get_all_meshes(), background_color)
     }
 }

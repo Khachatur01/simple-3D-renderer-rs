@@ -24,9 +24,9 @@ impl Mesh {
         self.faces.iter()
             .map(|face: &Face| {
                 Triangle::new([
-                    self.points[face.vertices[0]],
-                    self.points[face.vertices[1]],
-                    self.points[face.vertices[2]]
+                    self.points[face.vertices[0]].clone(),
+                    self.points[face.vertices[1]].clone(),
+                    self.points[face.vertices[2]].clone()
                 ], face.color)
             })
             .collect()

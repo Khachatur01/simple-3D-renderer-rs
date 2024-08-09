@@ -5,3 +5,4 @@ pub mod pixel;
 pub mod depth_pixel;
 pub mod compositor;
 mod color_blender;
+mod z_buffered_triangle;
