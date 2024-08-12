@@ -72,9 +72,15 @@ fn draw_line(point0: ZBufferedVertex,
              color: Color,
              pixel_buffer: &mut DepthPixelBuffer) {
 
-    for ((x, y), opacity) in XiaolinWu::<f32, isize>::new((point0.x, point0.y), (point1.x, point1.y)) {
+    let line: XiaolinWu<f32, isize> = XiaolinWu::new((point0.x, point0.y), (point1.x, point1.y));
+
+    let line_length: f32 = ((point0.x - point1.x).powi(2) + (point0.y - point1.y).powi(2)).sqrt();
+
+    let depth_step: f32 = (point1.distance - point0.distance) / line_length;
+
+    for ((x, y), opacity) in line {
         set_pixel(x as usize, y as usize,
-                  1.0, /* @FIXME */
+                  point0.distance + depth_step,
                   Color::new(color.r, color.g, color.b, color.a * opacity),
                   pixel_buffer
         );
@@ -106,7 +112,7 @@ fn get_fill_line(row: usize, row_pixels: &Vec<DepthPixel>) -> (ZBufferedVertex, 
     let mut right: &DepthPixel= row_pixels.last().unwrap();
 
     let mut left_column: usize = 0;
-    let mut right_column: usize = 0;
+    let mut right_column: usize = row_pixels.len() - 1;
 
     for (col, col_pixel) in row_pixels.iter().enumerate() {
         if col_pixel.color.a < left.color.a {

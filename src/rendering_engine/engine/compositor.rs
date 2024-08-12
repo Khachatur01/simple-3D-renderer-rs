@@ -1,3 +1,4 @@
+use crate::rendering_engine::engine::model::depth_pixel::DepthPixel;
 use crate::rendering_engine::engine::model::pixel::Pixel;
 use crate::rendering_engine::engine::rasterizer::ZBuffer;
 use crate::rendering_engine::scene::camera::display::Display;
@@ -36,6 +37,8 @@ fn blend_pixel(row: usize, col: usize, z_buffers: &Vec<ZBuffer>, background_colo
         background_color.b,
     );
 
+    let mut pixel_buffer: Vec<&DepthPixel> = Vec::with_capacity(z_buffers.len());
+
     for z_buffer in z_buffers {
         let row: isize = row as isize - z_buffer.y;
         let col: isize = col as isize - z_buffer.x;
@@ -50,27 +53,26 @@ fn blend_pixel(row: usize, col: usize, z_buffers: &Vec<ZBuffer>, background_colo
             .map(|row_pixels| row_pixels.get(col as usize));
 
         if let Some(Some(depth_pixel)) = depth_pixel {
-            if depth_pixel.color.a != 0.0 {
-                let mut depth_pixel_color: Color = depth_pixel.color.clone();
-
-                let alpha: f32 = depth_pixel_color.a;
-
-                blended_pixel = Pixel::new(
-                    ((1.0 - alpha) * blended_pixel.r as f32 + alpha * depth_pixel_color.r as f32) as u8,
-                    ((1.0 - alpha) * blended_pixel.g as f32 + alpha * depth_pixel_color.g as f32) as u8,
-                    ((1.0 - alpha) * blended_pixel.b as f32 + alpha * depth_pixel_color.b as f32) as u8,
-                );
-
-                // let pixel: Pixel = Pixel::new(
-                //     ((1.0 - alpha) * background_color.r as f32 + alpha * depth_pixel_color.r as f32) as u8,
-                //     ((1.0 - alpha) * background_color.g as f32 + alpha * depth_pixel_color.g as f32) as u8,
-                //     ((1.0 - alpha) * background_color.b as f32 + alpha * depth_pixel_color.b as f32) as u8,
-                // );
-                //
-                // return pixel;
-            }
+            pixel_buffer.push(&depth_pixel);
         }
     }
+
+    pixel_buffer
+        .sort_by(|left: &&DepthPixel, right: &&DepthPixel| {
+            right.depth.total_cmp(&left.depth)
+        });
+
+    pixel_buffer.iter().for_each(|depth_pixel: &&DepthPixel| {
+        let mut depth_pixel_color: Color = depth_pixel.color.clone();
+
+        let alpha: f32 = depth_pixel_color.a;
+
+        blended_pixel = Pixel::new(
+            ((1.0 - alpha) * blended_pixel.r as f32 + alpha * depth_pixel_color.r as f32) as u8,
+            ((1.0 - alpha) * blended_pixel.g as f32 + alpha * depth_pixel_color.g as f32) as u8,
+            ((1.0 - alpha) * blended_pixel.b as f32 + alpha * depth_pixel_color.b as f32) as u8,
+        );
+    });
 
     blended_pixel
 }

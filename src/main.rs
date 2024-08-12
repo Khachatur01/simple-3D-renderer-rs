@@ -8,7 +8,7 @@ use crate::rendering_engine::scene::camera::Camera;
 use crate::rendering_engine::scene::model::color::Color as RenderingColor;
 use crate::rendering_engine::scene::model_3d::point::Point as Point3D;
 use crate::rendering_engine::scene::model_3d::vector::Vector;
-use crate::rendering_engine::scene::Scene;
+use crate::rendering_engine::scene::{CameraID, Scene};
 use crate::rendering_engine::{RenderingEngine, SceneId};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -42,9 +42,8 @@ pub fn main() {
     );
 
     scene.add_cube(Point3D { x: 0.0, y: 0.0, z: 300.0 }, 100.0, 100.0, 100.0, RenderingColor::new(255, 0, 0, 0.2));
-    scene.add_cube(Point3D { x: 0.0, y: 0.0, z: 800.0 }, 100.0, 100.0, 100.0, RenderingColor::new(255, 0, 0, 0.5));
-    // scene.add_cube(Point3D { x: 120.0, y: 0.0, z: 300.0 }, 100.0, 100.0, 100.0, RenderingColor::new(255, 0, 0, 1.0));
-
+    scene.add_cube(Point3D { x: 100.0, y: 0.0, z: 500.0 }, 100.0, 100.0, 100.0, RenderingColor::new(0, 0, 80, 1.0));
+    scene.add_cube(Point3D { x: 0.0, y: 0.0, z: 800.0 }, 100.0, 100.0, 100.0, RenderingColor::new(0, 125, 0, 0.3));
 
     let sdl_context: Sdl = sdl2::init().unwrap();
     let video_subsystem: VideoSubsystem = sdl_context.video().unwrap();
@@ -55,6 +54,7 @@ pub fn main() {
         .unwrap();
 
     let mut canvas: WindowCanvas = window.into_canvas().build().unwrap();
+    render(&renderer, scene_id, camera_id, &mut canvas);
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
@@ -86,16 +86,16 @@ pub fn main() {
             }
         }
 
-        let before = Instant::now();
-        let image: Image = renderer.render(scene_id, camera_id, RenderingColor::new(255, 255, 255, 1.0));
-        render(image, &mut canvas);
-        println!("Elapsed time: {:.2?}", before.elapsed());
+        render(&renderer, scene_id, camera_id, &mut canvas);
 
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
 
-fn render(image: Image, canvas: &mut WindowCanvas) {
+fn render(rendering_engine: &RenderingEngine, scene_id: SceneId, camera_id: CameraID, canvas: &mut WindowCanvas) {
+    let image: Image = rendering_engine.render(scene_id, camera_id, RenderingColor::new(255, 255, 255, 1.0));
+
+    let before = Instant::now();
     for (row, row_pixels) in image.iter().enumerate() {
         for (col, pixel) in row_pixels.iter().enumerate() {
             let x: i32 = col as i32;
@@ -107,4 +107,5 @@ fn render(image: Image, canvas: &mut WindowCanvas) {
     }
 
     canvas.present();
+    println!("Elapsed time: {:.2?}", before.elapsed());
 }
