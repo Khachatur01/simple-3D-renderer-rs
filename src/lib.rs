@@ -1,15 +1,14 @@
 use uuid::Uuid;
-use wasm_bindgen::JsValue;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsValue;
 
-use crate::rendering_engine::RenderingEngine;
-use crate::rendering_engine::scene::camera::Camera;
 use crate::rendering_engine::scene::camera::display::Display;
+use crate::rendering_engine::scene::camera::Camera;
 use crate::rendering_engine::scene::model::color::Color;
-use crate::rendering_engine::scene::model_2d::triangle::Triangle as Triangle2D;
 use crate::rendering_engine::scene::model_3d::face::Face;
 use crate::rendering_engine::scene::model_3d::point::Point as Point3D;
 use crate::rendering_engine::scene::model_3d::vector::Vector as Vector3D;
+use crate::rendering_engine::RenderingEngine;
 
 mod rendering_engine;
 
@@ -64,7 +63,7 @@ pub unsafe fn add_mesh(scene_id: String) -> String {
                 Point3D { x: 50.0, y: 0.0, z: 250.0 }, /* top right */
             ],
             vec![
-                Face::new([0, 1, 2], Color::new(255, 0, 0, 120))
+                Face::new([0, 1, 2], Color::new(255, 0, 0, 0.5))
             ]
         ).to_string()
 }
@@ -78,7 +77,7 @@ pub unsafe fn add_cube(scene_id: String, position: JsValue, width: f32, height: 
     RENDERING_ENGINES[0].get_scene(scene_id).unwrap().add_cube(
         position,
         width, height, length,
-        Color::new(255, 0, 0, 120)
+        Color::new(255, 0, 0, 0.5)
     ).to_string()
 }
 
@@ -131,21 +130,21 @@ pub unsafe fn move_camera_focal_length(scene_id: String, camera_id: String, delt
         .move_focal_length(delta);
 }
 
-#[wasm_bindgen]
-pub unsafe fn render(scene_id: String, camera_id: String) -> JsValue {
-    let scene_id: Uuid = Uuid::parse_str(scene_id.as_str()).unwrap();
-    let camera_id: Uuid = Uuid::parse_str(camera_id.as_str()).unwrap();
-
-    let triangles: Vec<Triangle2D> = RENDERING_ENGINES[0]
-        .get_scene(scene_id).unwrap()
-        .render(camera_id).unwrap();
-
-    serde_wasm_bindgen::to_value(&triangles).unwrap()
-}
+// #[wasm_bindgen]
+// pub unsafe fn render(scene_id: String, camera_id: String) -> JsValue {
+//     let scene_id: Uuid = Uuid::parse_str(scene_id.as_str()).unwrap();
+//     let camera_id: Uuid = Uuid::parse_str(camera_id.as_str()).unwrap();
+//
+//     let triangles: Vec<Triangle2D> = RENDERING_ENGINES[0]
+//         .get_scene(scene_id).unwrap()
+//         .render(camera_id).unwrap();
+//
+//     serde_wasm_bindgen::to_value(&triangles).unwrap()
+// }
 #[wasm_bindgen]
 pub unsafe fn render_new(scene_id: String, camera_id: String) -> JsValue {
     let scene_id: Uuid = Uuid::parse_str(scene_id.as_str()).unwrap();
     let camera_id: Uuid = Uuid::parse_str(camera_id.as_str()).unwrap();
 
-    serde_wasm_bindgen::to_value(&RENDERING_ENGINES[0].render(scene_id, camera_id)).unwrap()
+    serde_wasm_bindgen::to_value(&RENDERING_ENGINES[0].render(scene_id, camera_id, Color::new(255, 255, 255, 1.0))).unwrap()
 }

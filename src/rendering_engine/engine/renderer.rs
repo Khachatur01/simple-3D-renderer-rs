@@ -1,13 +1,9 @@
-use std::collections::hash_map::Values;
-use std::collections::HashMap;
-
 use crate::rendering_engine::engine::compositor::{composite, Image};
+use crate::rendering_engine::engine::model::z_buffered_triangle::{ZBufferedTriangle, ZBufferedVertex};
 use crate::rendering_engine::engine::projector::project;
 use crate::rendering_engine::engine::rasterizer::{rasterize, ZBuffer};
-use crate::rendering_engine::engine::z_buffered_triangle::{ZBufferedTriangle, ZBufferedVertex};
-use crate::rendering_engine::scene::camera::Camera;
 use crate::rendering_engine::scene::camera::display::Display;
-use crate::rendering_engine::scene::MeshID;
+use crate::rendering_engine::scene::camera::Camera;
 use crate::rendering_engine::scene::model::color::Color;
 use crate::rendering_engine::scene::model_2d::point::Point as Point2D;
 use crate::rendering_engine::scene::model_2d::triangle::Triangle as Triangle2D;
@@ -16,6 +12,9 @@ use crate::rendering_engine::scene::model_3d::plane::Plane;
 use crate::rendering_engine::scene::model_3d::plane_direction::PlaneDirection;
 use crate::rendering_engine::scene::model_3d::point::Point as Point3D;
 use crate::rendering_engine::scene::model_3d::triangle::Triangle as Triangle3D;
+use crate::rendering_engine::scene::MeshID;
+use std::collections::hash_map::Values;
+use std::collections::HashMap;
 
 pub fn render(camera: &Camera, meshes: Values<MeshID, Mesh>, background_color: Color) -> Image {
     let camera_planes: HashMap<PlaneDirection, Plane> = camera.create_planes();
@@ -27,7 +26,7 @@ pub fn render(camera: &Camera, meshes: Values<MeshID, Mesh>, background_color: C
             .map(|triangle3d: &Triangle3D| {
                 let triangle2d: Triangle2D = project(&camera_planes, camera.focal_length(), &triangle3d);
                 let z_buffered_triangle: ZBufferedTriangle = z_buffer_triangle(&triangle2d, triangle3d, camera.display(), triangle3d.color());
-    
+
                 rasterize(&z_buffered_triangle)
             }).collect();
 

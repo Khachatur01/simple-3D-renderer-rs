@@ -81,7 +81,7 @@ impl Camera {
         planes.insert(PlaneDirection::XZ, Plane::new(xz_plane_normal, self.center));
         planes.insert(PlaneDirection::XY, Plane::new(xy_plane_normal, self.center));
 
-        return planes;
+        planes
     }
 
     pub fn focal_length(&self) -> f32 {

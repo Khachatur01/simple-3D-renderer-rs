@@ -1,9 +1,8 @@
 use line_drawing::XiaolinWu;
 use serde::{Deserialize, Serialize};
 
-use crate::rendering_engine::engine::depth_pixel::DepthPixel;
-use crate::rendering_engine::engine::pixel::Pixel;
-use crate::rendering_engine::engine::z_buffered_triangle::{ZBufferedTriangle, ZBufferedVertex};
+use crate::rendering_engine::engine::model::depth_pixel::DepthPixel;
+use crate::rendering_engine::engine::model::z_buffered_triangle::{ZBufferedTriangle, ZBufferedVertex, ZBufferedVertices};
 use crate::rendering_engine::scene::model::color::Color;
 
 pub type DepthPixelBuffer = Vec<Vec<DepthPixel>>;
@@ -17,8 +16,8 @@ type BoundingBox = (f32, f32, f32, f32);
 #[derive(Serialize, Deserialize)]
 pub struct ZBuffer {
     pub buffer: DepthPixelBuffer,
-    pub x: usize,
-    pub y: usize,
+    pub x: isize,
+    pub y: isize,
 }
 
 pub fn rasterize(z_buffered_triangle: &ZBufferedTriangle) -> ZBuffer {
@@ -32,63 +31,118 @@ pub fn rasterize(z_buffered_triangle: &ZBufferedTriangle) -> ZBuffer {
             buffer_height + 1
         ];
 
-    let relative_vertex0 = ZBufferedVertex {
-        x: z_buffered_triangle.vertices[0].x - x,
-        y: z_buffered_triangle.vertices[0].y - y,
-        distance: z_buffered_triangle.vertices[0].distance
-    };
+    let relative_vertices: ZBufferedVertices = z_buffered_triangle.vertices
+        .map(|z_buffered_vertex: ZBufferedVertex| {
+            ZBufferedVertex {
+                x: z_buffered_vertex.x - x,
+                y: z_buffered_vertex.y - y,
+                distance: z_buffered_vertex.distance
+            }
+        });
 
-    let relative_vertex1 = ZBufferedVertex {
-        x: z_buffered_triangle.vertices[1].x - x,
-        y: z_buffered_triangle.vertices[1].y - y,
-        distance: z_buffered_triangle.vertices[1].distance
-    };
+    for i in 0..3 {
+        let current: usize = i;
+        let next: usize = if i == 2 {
+            0
+        } else {
+            i + 1
+        };
 
-    let relative_vertex2 = ZBufferedVertex {
-        x: z_buffered_triangle.vertices[2].x - x,
-        y: z_buffered_triangle.vertices[2].y - y,
-        distance: z_buffered_triangle.vertices[2].distance
-    };
+        draw_line(
+            relative_vertices[current],
+            relative_vertices[next],
+            z_buffered_triangle.color,
+            &mut pixel_buffer
+        );
+    }
 
-    draw_line(
-        relative_vertex0,
-        relative_vertex1,
-        z_buffered_triangle.color,
-        &mut pixel_buffer
-    );
-
-    draw_line(
-        relative_vertex1,
-        relative_vertex2,
-        z_buffered_triangle.color,
-        &mut pixel_buffer
-    );
-
-    draw_line(
-        relative_vertex2,
-        relative_vertex0,
-        z_buffered_triangle.color,
-        &mut pixel_buffer
-    );
+    let fill_lines: Vec<(ZBufferedVertex, ZBufferedVertex)> = get_fill_lines(&mut pixel_buffer);
+    fill(z_buffered_triangle.color, fill_lines, &mut pixel_buffer);
 
     ZBuffer {
         buffer: pixel_buffer,
-        x: x.floor() as usize,
-        y: y.floor() as usize
+        x: x.floor() as isize,
+        y: y.floor() as isize
     }
 }
 
+#[inline]
 fn draw_line(point0: ZBufferedVertex,
              point1: ZBufferedVertex,
              color: Color,
              pixel_buffer: &mut DepthPixelBuffer) {
 
-    for ((x, y), value) in XiaolinWu::<f32, isize>::new((point0.x, point0.y), (point1.x, point1.y)) {
+    for ((x, y), opacity) in XiaolinWu::<f32, isize>::new((point0.x, point0.y), (point1.x, point1.y)) {
         set_pixel(x as usize, y as usize,
-                  Color::new(color.r, color.g, color.b, (color.a as f32 * value) as u8),
+                  1.0, /* @FIXME */
+                  Color::new(color.r, color.g, color.b, color.a * opacity),
                   pixel_buffer
         );
     }
+}
+
+fn get_fill_lines(pixel_buffer: &mut DepthPixelBuffer) -> Vec<(ZBufferedVertex, ZBufferedVertex)> {
+    pixel_buffer
+        .iter()
+        .enumerate()
+        .map(|(row, row_pixels)| {
+            get_fill_line(row, row_pixels)
+        })
+        .collect()
+}
+
+fn fill(
+    color: Color,
+    fill_lines: Vec<(ZBufferedVertex, ZBufferedVertex)>,
+    pixel_buffer: &mut DepthPixelBuffer) {
+
+    fill_lines.iter().for_each(|fill_line: &(ZBufferedVertex, ZBufferedVertex)| {
+        draw_line(fill_line.0, fill_line.1, color, pixel_buffer);
+    });
+}
+
+fn get_fill_line(row: usize, row_pixels: &Vec<DepthPixel>) -> (ZBufferedVertex, ZBufferedVertex) {
+    let mut left: &DepthPixel = row_pixels.first().unwrap();
+    let mut right: &DepthPixel= row_pixels.last().unwrap();
+
+    let mut left_column: usize = 0;
+    let mut right_column: usize = 0;
+
+    for (col, col_pixel) in row_pixels.iter().enumerate() {
+        if col_pixel.color.a < left.color.a {
+            break;
+        }
+
+        if col_pixel.color.a > left.color.a {
+            left = col_pixel;
+            left_column = col;
+        }
+    }
+
+    for (col, col_pixel) in row_pixels.iter().rev().enumerate() {
+        if col_pixel.color.a < right.color.a {
+            break;
+        }
+
+        if col_pixel.color.a > right.color.a {
+            right = col_pixel;
+            right_column = row_pixels.len() - col - 1;
+        }
+    }
+
+    let left: ZBufferedVertex = ZBufferedVertex {
+        x: left_column as f32,
+        y: row as f32,
+        distance: left.depth
+    };
+
+    let right: ZBufferedVertex = ZBufferedVertex {
+        x: right_column as f32,
+        y: row as f32,
+        distance: right.depth
+    };
+
+    (left, right)
 }
 
 fn create_bounding_box(z_buffered_triangle: &ZBufferedTriangle) -> (f32, f32, f32, f32) {
@@ -115,13 +169,14 @@ fn create_bounding_box(z_buffered_triangle: &ZBufferedTriangle) -> (f32, f32, f3
 
 
 /** brightness is a value from 0 to 1 */
-fn set_pixel(col: usize, row: usize, color: Color, pixel_buffer: &mut DepthPixelBuffer) {
+#[inline]
+fn set_pixel(col: usize, row: usize, depth: f32, color: Color, pixel_buffer: &mut DepthPixelBuffer) {
     if row >= pixel_buffer.len() || col >= pixel_buffer[0].len() {
         return;
     }
 
     pixel_buffer[row][col] = DepthPixel {
-        pixel: Pixel::new(color.r, color.g, color.b, color.a),
-        depth: 1.0 /* @FIXME */
+        color: Color::new(color.r, color.g, color.b, color.a),
+        depth
     }
 }

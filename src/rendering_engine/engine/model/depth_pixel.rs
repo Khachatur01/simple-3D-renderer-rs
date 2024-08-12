@@ -1,18 +1,18 @@
 use serde::{Deserialize, Serialize};
 
-use crate::rendering_engine::engine::pixel::Pixel;
+use crate::rendering_engine::scene::model::color::Color;
 
 #[derive(Copy, Clone)]
 #[derive(Serialize, Deserialize)]
 pub struct DepthPixel {
-    pub pixel: Pixel,
+    pub color: Color,
     pub depth: f32, /* value should be from 0 to 1 */
 }
 
 impl DepthPixel {
-    pub fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
+    pub fn new(r: u8, g: u8, b: u8, a: f32) -> Self {
         DepthPixel {
-            pixel: Pixel::new(r, g, b, a),
+            color: Color::new(r, g, b, a),
             depth: 0.0
         }
     }
@@ -21,7 +21,7 @@ impl DepthPixel {
 impl Default for DepthPixel {
     fn default() -> Self {
         DepthPixel {
-            pixel: Pixel::new(0, 0, 0, 0),
+            color: Color::new(0, 0, 0, 0.0),
             depth: 0.0
         }
     }

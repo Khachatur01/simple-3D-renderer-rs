@@ -7,8 +7,9 @@ use scene::Scene;
 use crate::rendering_engine::engine::compositor::Image;
 use crate::rendering_engine::engine::renderer::render;
 use crate::rendering_engine::scene::camera::Camera;
-use crate::rendering_engine::scene::CameraID;
 use crate::rendering_engine::scene::model::color::Color;
+use crate::rendering_engine::scene::model_3d::vector::Vector;
+use crate::rendering_engine::scene::CameraID;
 
 pub mod scene;
 pub mod engine;
@@ -37,6 +38,27 @@ impl RenderingEngine {
 
     pub fn get_scene(&mut self, scene_id: SceneId) -> Option<&mut Scene> {
         self.scenes.get_mut(&scene_id)
+    }
+
+    pub fn reposition_camera(&mut self, scene_id: SceneId, camera_id: CameraID, delta: Vector) {
+        self.scenes
+            .get_mut(&scene_id).unwrap()
+            .get_camera_mut(camera_id).unwrap()
+            .reposition(delta);
+    }
+
+    pub fn rotate_camera(&mut self, scene_id: SceneId, camera_id: CameraID, delta: &Vector) {
+        self.scenes
+            .get_mut(&scene_id).unwrap()
+            .get_camera_mut(camera_id).unwrap()
+            .rotate(delta);
+    }
+
+    pub fn move_camera_focal_length(&mut self, scene_id: SceneId, camera_id: CameraID, delta: f32) {
+        self.scenes
+            .get_mut(&scene_id).unwrap()
+            .get_camera_mut(camera_id).unwrap()
+            .move_focal_length(delta);
     }
 
     pub fn render(&self, scene_id: SceneId, camera_id: CameraID, background_color: Color) -> Image {
