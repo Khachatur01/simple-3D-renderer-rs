@@ -11,19 +11,19 @@ use crate::rendering_engine::scene::model::color::Color;
 use crate::rendering_engine::scene::model_3d::vector::Vector;
 use crate::rendering_engine::scene::CameraID;
 
-pub mod scene;
 pub mod engine;
+pub mod scene;
 
 pub type SceneId = Uuid;
 
 pub struct RenderingEngine {
-    scenes: HashMap<SceneId, Scene>
+    scenes: HashMap<SceneId, Scene>,
 }
 
 impl RenderingEngine {
     pub fn new() -> RenderingEngine {
         RenderingEngine {
-            scenes: HashMap::new()
+            scenes: HashMap::new(),
         }
     }
 
@@ -42,22 +42,28 @@ impl RenderingEngine {
 
     pub fn reposition_camera(&mut self, scene_id: SceneId, camera_id: CameraID, delta: Vector) {
         self.scenes
-            .get_mut(&scene_id).unwrap()
-            .get_camera_mut(camera_id).unwrap()
+            .get_mut(&scene_id)
+            .unwrap()
+            .get_camera_mut(camera_id)
+            .unwrap()
             .reposition(delta);
     }
 
     pub fn rotate_camera(&mut self, scene_id: SceneId, camera_id: CameraID, delta: &Vector) {
         self.scenes
-            .get_mut(&scene_id).unwrap()
-            .get_camera_mut(camera_id).unwrap()
+            .get_mut(&scene_id)
+            .unwrap()
+            .get_camera_mut(camera_id)
+            .unwrap()
             .rotate(delta);
     }
 
     pub fn move_camera_focal_length(&mut self, scene_id: SceneId, camera_id: CameraID, delta: f32) {
         self.scenes
-            .get_mut(&scene_id).unwrap()
-            .get_camera_mut(camera_id).unwrap()
+            .get_mut(&scene_id)
+            .unwrap()
+            .get_camera_mut(camera_id)
+            .unwrap()
             .move_focal_length(delta);
     }
 

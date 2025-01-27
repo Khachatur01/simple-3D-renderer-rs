@@ -16,21 +16,27 @@ pub struct Camera {
     focal_length: f32,
     center: Point,
     pitch_angle: f32, /* x axis */
-    yaw_angle: f32, /* y axis */
-    roll_angle: f32, /* z axis */
-    display: Display
+    yaw_angle: f32,   /* y axis */
+    roll_angle: f32,  /* z axis */
+    display: Display,
 }
 
 impl Camera {
-    pub fn new(focal_length: f32,
-               center: Point,
-               pitch_angle: f32,
-               yaw_angle: f32,
-               roll_angle: f32,
-               display: Display) -> Camera {
-
+    pub fn new(
+        focal_length: f32,
+        center: Point,
+        pitch_angle: f32,
+        yaw_angle: f32,
+        roll_angle: f32,
+        display: Display,
+    ) -> Camera {
         Camera {
-            focal_length, center, pitch_angle, yaw_angle, roll_angle, display
+            focal_length,
+            center,
+            pitch_angle,
+            yaw_angle,
+            roll_angle,
+            display,
         }
     }
 
@@ -59,9 +65,21 @@ impl Camera {
     }
 
     pub fn create_planes(&self) -> HashMap<PlaneDirection, Plane> {
-        let mut yz_plane_normal: Vector = Vector { x: 1.0, y: 0.0, z: 0.0 };
-        let mut xz_plane_normal: Vector = Vector { x: 0.0, y: 1.0, z: 0.0 };
-        let mut xy_plane_normal: Vector = Vector { x: 0.0, y: 0.0, z: 1.0 };
+        let mut yz_plane_normal: Vector = Vector {
+            x: 1.0,
+            y: 0.0,
+            z: 0.0,
+        };
+        let mut xz_plane_normal: Vector = Vector {
+            x: 0.0,
+            y: 1.0,
+            z: 0.0,
+        };
+        let mut xy_plane_normal: Vector = Vector {
+            x: 0.0,
+            y: 0.0,
+            z: 1.0,
+        };
 
         yz_plane_normal.rotate(Axis::Y, self.yaw_angle);
         yz_plane_normal.rotate(Axis::Z, self.roll_angle);

@@ -6,13 +6,11 @@ pub type TriangleVertices = [Point; 3];
 
 #[derive(Serialize, Deserialize)]
 pub struct Triangle {
-    pub vertices: TriangleVertices
+    pub vertices: TriangleVertices,
 }
 
 impl Triangle {
     pub fn new(vertices: TriangleVertices) -> Triangle {
-        Triangle {
-            vertices
-        }
+        Triangle { vertices }
     }
 }

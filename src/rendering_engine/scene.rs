@@ -11,23 +11,23 @@ use crate::rendering_engine::scene::model::color::Color;
 use crate::rendering_engine::scene::model_3d::face::Face;
 
 pub mod camera;
+pub mod model;
 pub mod model_2d;
 pub mod model_3d;
-pub mod model;
 
 pub type CameraID = Uuid;
 pub type MeshID = Uuid;
 
 pub struct Scene {
     cameras: HashMap<CameraID, Camera>,
-    meshes: HashMap<MeshID, Mesh>
+    meshes: HashMap<MeshID, Mesh>,
 }
 
 impl Scene {
     pub fn new() -> Scene {
         Scene {
             cameras: HashMap::new(),
-            meshes: HashMap::new()
+            meshes: HashMap::new(),
         }
     }
 
@@ -63,7 +63,14 @@ impl Scene {
         object_id
     }
 
-    pub fn add_cube(&mut self, position: Point3D, width: f32, height: f32, length: f32, color: Color) -> MeshID {
+    pub fn add_cube(
+        &mut self,
+        position: Point3D,
+        width: f32,
+        height: f32,
+        length: f32,
+        color: Color,
+    ) -> MeshID {
         let width: f32 = width / 2.0;
         let height: f32 = height / 2.0;
         let length: f32 = length / 2.0;
@@ -72,31 +79,68 @@ impl Scene {
 
         let points: Vec<Point3D> = vec![
             /* front face */
-            Point3D { x: x - width, y: y - height, z: z - length }, /* 0 bottom left */
-            Point3D { x: x - width, y: y + height, z: z - length }, /* 1 top left */
-            Point3D { x: x + width, y: y + height, z: z - length }, /* 2 top right */
-            Point3D { x: x + width, y: y - height, z: z - length }, /* 3 bottom right */
-
+            Point3D {
+                x: x - width,
+                y: y - height,
+                z: z - length,
+            }, /* 0 bottom left */
+            Point3D {
+                x: x - width,
+                y: y + height,
+                z: z - length,
+            }, /* 1 top left */
+            Point3D {
+                x: x + width,
+                y: y + height,
+                z: z - length,
+            }, /* 2 top right */
+            Point3D {
+                x: x + width,
+                y: y - height,
+                z: z - length,
+            }, /* 3 bottom right */
             /* back face */
-            Point3D { x: x - width, y: y - height, z: z + length }, /* 4 bottom left */
-            Point3D { x: x - width, y: y + height, z: z + length }, /* 5 top left */
-            Point3D { x: x + width, y: y + height, z: z + length }, /* 6 top right */
-            Point3D { x: x + width, y: y - height, z: z + length }, /* 7 bottom right */
+            Point3D {
+                x: x - width,
+                y: y - height,
+                z: z + length,
+            }, /* 4 bottom left */
+            Point3D {
+                x: x - width,
+                y: y + height,
+                z: z + length,
+            }, /* 5 top left */
+            Point3D {
+                x: x + width,
+                y: y + height,
+                z: z + length,
+            }, /* 6 top right */
+            Point3D {
+                x: x + width,
+                y: y - height,
+                z: z + length,
+            }, /* 7 bottom right */
         ];
 
         let faces: Vec<Face> = vec![
             /* front face */
-            Face::new([0, 1, 2], color), Face::new([0, 2, 3], color),
+            Face::new([0, 1, 2], color),
+            Face::new([0, 2, 3], color),
             /* back face */
-            Face::new([4, 5, 6], color), Face::new([4, 6, 7], color),
+            Face::new([4, 5, 6], color),
+            Face::new([4, 6, 7], color),
             /* left face */
-            Face::new([0, 1, 4], color), Face::new([1, 5, 4], color),
+            Face::new([0, 1, 4], color),
+            Face::new([1, 5, 4], color),
             /* top face */
-            Face::new([1, 2, 5], color), Face::new([2, 5, 6], color),
+            Face::new([1, 2, 5], color),
+            Face::new([2, 5, 6], color),
             /* left face */
-            Face::new([2, 6, 3], color), Face::new([3, 6, 7], color),
+            Face::new([2, 6, 3], color),
+            Face::new([3, 6, 7], color),
             /* bottom face */
-            Face::new([0, 4, 7], color), Face::new([0, 7, 3], color),
+            Face::new([0, 4, 7], color),
+            Face::new([0, 7, 3], color),
         ];
 
         self.add_mesh(points, faces)

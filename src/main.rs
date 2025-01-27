@@ -30,25 +30,59 @@ pub fn main() {
     let scene_id: SceneId = renderer.create_scene();
     let scene: &mut Scene = renderer.get_scene(scene_id).unwrap();
 
-    let camera_id = scene.add_camera(
-        Camera::new(
-            (((WIDTH + HEIGHT) / 2) * 2) as f32,
-            Point3D { x: 0.0, y: 0.0, z: 0.0 },
-            0.0,
-            0.0,
-            0.0,
-            Display::new(WIDTH, HEIGHT)
-        )
-    );
 
-    scene.add_cube(Point3D { x: 0.0, y: 0.0, z: 300.0 }, 100.0, 100.0, 100.0, RenderingColor::new(255, 0, 0, 0.2));
-    scene.add_cube(Point3D { x: 100.0, y: 0.0, z: 500.0 }, 100.0, 100.0, 100.0, RenderingColor::new(0, 0, 80, 1.0));
-    scene.add_cube(Point3D { x: 0.0, y: 0.0, z: 800.0 }, 100.0, 100.0, 100.0, RenderingColor::new(0, 125, 0, 0.3));
+    let camera_id = scene.add_camera(Camera::new(
+        (((WIDTH + HEIGHT) / 2) * 2) as f32,
+        Point3D {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        },
+        0.0,
+        0.0,
+        0.0,
+        Display::new(WIDTH, HEIGHT),
+    ));
+
+    scene.add_cube(
+        Point3D {
+            x: 0.0,
+            y: 0.0,
+            z: 300.0,
+        },
+        100.0,
+        100.0,
+        100.0,
+        RenderingColor::new(255, 0, 0, 0.2),
+    );
+    scene.add_cube(
+        Point3D {
+            x: 100.0,
+            y: 0.0,
+            z: 500.0,
+        },
+        100.0,
+        100.0,
+        100.0,
+        RenderingColor::new(0, 0, 80, 1.0),
+    );
+    scene.add_cube(
+        Point3D {
+            x: 0.0,
+            y: 0.0,
+            z: 800.0,
+        },
+        100.0,
+        100.0,
+        100.0,
+        RenderingColor::new(0, 125, 0, 0.3),
+    );
 
     let sdl_context: Sdl = sdl2::init().unwrap();
     let video_subsystem: VideoSubsystem = sdl_context.video().unwrap();
 
-    let window: Window = video_subsystem.window("rust-sdl2 demo", WIDTH as u32, HEIGHT as u32)
+    let window: Window = video_subsystem
+        .window("rust-sdl2 demo", WIDTH as u32, HEIGHT as u32)
         .position_centered()
         .build()
         .unwrap();
@@ -60,27 +94,94 @@ pub fn main() {
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit {..} |
-                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                    break 'running
-                },
-                Event::KeyDown { keycode: Some(Keycode::W), .. } => {
-                    renderer.reposition_camera(scene_id, camera_id, Vector { x: 0.0, y: 0.0, z: -MOVE_STEP });
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
+                Event::KeyDown {
+                    keycode: Some(Keycode::W),
+                    ..
+                } => {
+                    renderer.reposition_camera(
+                        scene_id,
+                        camera_id,
+                        Vector {
+                            x: 0.0,
+                            y: 0.0,
+                            z: -MOVE_STEP,
+                        },
+                    );
                 }
-                Event::KeyDown { keycode: Some(Keycode::S), .. } => {
-                    renderer.reposition_camera(scene_id, camera_id, Vector { x: 0.0, y: 0.0, z: MOVE_STEP });
+                Event::KeyDown {
+                    keycode: Some(Keycode::S),
+                    ..
+                } => {
+                    renderer.reposition_camera(
+                        scene_id,
+                        camera_id,
+                        Vector {
+                            x: 0.0,
+                            y: 0.0,
+                            z: MOVE_STEP,
+                        },
+                    );
                 }
-                Event::KeyDown { keycode: Some(Keycode::D), .. } => {
-                    renderer.reposition_camera(scene_id, camera_id, Vector { x: -MOVE_STEP, y: 0.0, z: 0.0 });
+                Event::KeyDown {
+                    keycode: Some(Keycode::D),
+                    ..
+                } => {
+                    renderer.reposition_camera(
+                        scene_id,
+                        camera_id,
+                        Vector {
+                            x: -MOVE_STEP,
+                            y: 0.0,
+                            z: 0.0,
+                        },
+                    );
                 }
-                Event::KeyDown { keycode: Some(Keycode::A), .. } => {
-                    renderer.reposition_camera(scene_id, camera_id, Vector { x: MOVE_STEP, y: 0.0, z: 0.0 });
+                Event::KeyDown {
+                    keycode: Some(Keycode::A),
+                    ..
+                } => {
+                    renderer.reposition_camera(
+                        scene_id,
+                        camera_id,
+                        Vector {
+                            x: MOVE_STEP,
+                            y: 0.0,
+                            z: 0.0,
+                        },
+                    );
                 }
-                Event::KeyDown { keycode: Some(Keycode::Left), .. } => {
-                    renderer.rotate_camera(scene_id, camera_id, &Vector { x: 0.0, y: -0.5, z: 0.0 });
+                Event::KeyDown {
+                    keycode: Some(Keycode::Left),
+                    ..
+                } => {
+                    renderer.rotate_camera(
+                        scene_id,
+                        camera_id,
+                        &Vector {
+                            x: 0.0,
+                            y: -0.5,
+                            z: 0.0,
+                        },
+                    );
                 }
-                Event::KeyDown { keycode: Some(Keycode::Right), .. } => {
-                    renderer.rotate_camera(scene_id, camera_id, &Vector { x: 0.0, y: 0.5, z: 0.0 });
+                Event::KeyDown {
+                    keycode: Some(Keycode::Right),
+                    ..
+                } => {
+                    renderer.rotate_camera(
+                        scene_id,
+                        camera_id,
+                        &Vector {
+                            x: 0.0,
+                            y: 0.5,
+                            z: 0.0,
+                        },
+                    );
                 }
                 _ => {}
             }
@@ -92,8 +193,14 @@ pub fn main() {
     }
 }
 
-fn render(rendering_engine: &RenderingEngine, scene_id: SceneId, camera_id: CameraID, canvas: &mut WindowCanvas) {
-    let image: Image = rendering_engine.render(scene_id, camera_id, RenderingColor::new(255, 255, 255, 1.0));
+fn render(
+    rendering_engine: &RenderingEngine,
+    scene_id: SceneId,
+    camera_id: CameraID,
+    canvas: &mut WindowCanvas,
+) {
+    let image: Image =
+        rendering_engine.render(scene_id, camera_id, RenderingColor::new(255, 255, 255, 1.0));
 
     let before = Instant::now();
     for (row, row_pixels) in image.iter().enumerate() {

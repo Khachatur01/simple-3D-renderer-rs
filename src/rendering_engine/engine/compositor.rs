@@ -7,16 +7,10 @@ use crate::rendering_engine::scene::model::color::Color;
 pub type Image = Vec<Vec<Pixel>>;
 
 pub fn composite(z_buffers: &Vec<ZBuffer>, display: &Display, background_color: Color) -> Image {
-    let default_pixel: Pixel = Pixel::new(
-        background_color.r,
-        background_color.g,
-        background_color.b
-    );
+    let default_pixel: Pixel =
+        Pixel::new(background_color.r, background_color.g, background_color.b);
 
-    let mut image: Image = vec![
-        vec![default_pixel; display.width];
-        display.height
-    ];
+    let mut image: Image = vec![vec![default_pixel; display.width]; display.height];
 
     for (row, row_pixels) in image.iter_mut().enumerate() {
         for (col, pixel) in row_pixels.iter_mut().enumerate() {
@@ -31,11 +25,8 @@ pub fn composite(z_buffers: &Vec<ZBuffer>, display: &Display, background_color: 
 }
 
 fn blend_pixel(row: usize, col: usize, z_buffers: &Vec<ZBuffer>, background_color: Color) -> Pixel {
-    let mut blended_pixel: Pixel = Pixel::new(
-        background_color.r,
-        background_color.g,
-        background_color.b,
-    );
+    let mut blended_pixel: Pixel =
+        Pixel::new(background_color.r, background_color.g, background_color.b);
 
     let mut pixel_buffer: Vec<&DepthPixel> = Vec::with_capacity(z_buffers.len());
 
@@ -43,12 +34,16 @@ fn blend_pixel(row: usize, col: usize, z_buffers: &Vec<ZBuffer>, background_colo
         let row: isize = row as isize - z_buffer.y;
         let col: isize = col as isize - z_buffer.x;
 
-        if row < 0 || row >= z_buffer.buffer.len() as isize ||
-            col < 0 || col >= z_buffer.buffer[0].len() as isize {
+        if row < 0
+            || row >= z_buffer.buffer.len() as isize
+            || col < 0
+            || col >= z_buffer.buffer[0].len() as isize
+        {
             continue;
         }
 
-        let depth_pixel = z_buffer.buffer
+        let depth_pixel = z_buffer
+            .buffer
             .get(row as usize)
             .map(|row_pixels| row_pixels.get(col as usize));
 
@@ -58,9 +53,7 @@ fn blend_pixel(row: usize, col: usize, z_buffers: &Vec<ZBuffer>, background_colo
     }
 
     pixel_buffer
-        .sort_by(|left: &&DepthPixel, right: &&DepthPixel| {
-            right.depth.total_cmp(&left.depth)
-        });
+        .sort_by(|left: &&DepthPixel, right: &&DepthPixel| right.depth.total_cmp(&left.depth));
 
     pixel_buffer.iter().for_each(|depth_pixel: &&DepthPixel| {
         let mut depth_pixel_color: Color = depth_pixel.color.clone();

@@ -5,7 +5,6 @@ use crate::rendering_engine::scene::model_3d::point::Point;
 
 pub type TriangleVertices = [Point; 3];
 
-
 #[derive(Serialize, Deserialize)]
 pub struct Triangle {
     vertices: TriangleVertices,
@@ -14,9 +13,7 @@ pub struct Triangle {
 
 impl Triangle {
     pub fn new(vertices: TriangleVertices, color: Color) -> Self {
-        Self {
-            vertices, color
-        }
+        Self { vertices, color }
     }
 
     pub fn vertices(&self) -> TriangleVertices {

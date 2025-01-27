@@ -21,13 +21,17 @@ impl Mesh {
     }
 
     pub fn triangulate(&self) -> Vec<Triangle> {
-        self.faces.iter()
+        self.faces
+            .iter()
             .map(|face: &Face| {
-                Triangle::new([
-                    self.points[face.vertices[0]].clone(),
-                    self.points[face.vertices[1]].clone(),
-                    self.points[face.vertices[2]].clone()
-                ], face.color)
+                Triangle::new(
+                    [
+                        self.points[face.vertices[0]].clone(),
+                        self.points[face.vertices[1]].clone(),
+                        self.points[face.vertices[2]].clone(),
+                    ],
+                    face.color,
+                )
             })
             .collect()
     }

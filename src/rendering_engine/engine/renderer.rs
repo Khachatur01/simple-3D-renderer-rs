@@ -1,5 +1,7 @@
 use crate::rendering_engine::engine::compositor::{composite, Image};
-use crate::rendering_engine::engine::model::z_buffered_triangle::{ZBufferedTriangle, ZBufferedVertex};
+use crate::rendering_engine::engine::model::z_buffered_triangle::{
+    ZBufferedTriangle, ZBufferedVertex,
+};
 use crate::rendering_engine::engine::projector::project;
 use crate::rendering_engine::engine::rasterizer::{rasterize, ZBuffer};
 use crate::rendering_engine::scene::camera::display::Display;
@@ -24,11 +26,18 @@ pub fn render(camera: &Camera, meshes: Values<MeshID, Mesh>, background_color: C
         let buffers: Vec<ZBuffer> = triangles
             .iter()
             .map(|triangle3d: &Triangle3D| {
-                let triangle2d: Triangle2D = project(&camera_planes, camera.focal_length(), &triangle3d);
-                let z_buffered_triangle: ZBufferedTriangle = z_buffer_triangle(&triangle2d, triangle3d, camera.display(), triangle3d.color());
+                let triangle2d: Triangle2D =
+                    project(&camera_planes, camera.focal_length(), &triangle3d);
+                let z_buffered_triangle: ZBufferedTriangle = z_buffer_triangle(
+                    &triangle2d,
+                    triangle3d,
+                    camera.display(),
+                    triangle3d.color(),
+                );
 
                 rasterize(&z_buffered_triangle)
-            }).collect();
+            })
+            .collect();
 
         z_buffers.extend(buffers);
     }
@@ -36,27 +45,31 @@ pub fn render(camera: &Camera, meshes: Values<MeshID, Mesh>, background_color: C
     composite(&z_buffers, camera.display(), background_color)
 }
 
-fn z_buffer_triangle(triangle2d: &Triangle2D,
-                     triangle3d: &Triangle3D,
-                     display: &Display,
-                     color: Color) -> ZBufferedTriangle {
+fn z_buffer_triangle(
+    triangle2d: &Triangle2D,
+    triangle3d: &Triangle3D,
+    display: &Display,
+    color: Color,
+) -> ZBufferedTriangle {
     let offset_width: usize = display.width / 2;
     let offset_height: usize = display.height / 2;
 
-    let z_buffered_vertices: Vec<ZBufferedVertex> = triangle2d.vertices
+    let z_buffered_vertices: Vec<ZBufferedVertex> = triangle2d
+        .vertices
         .iter()
         .zip(triangle3d.vertices().iter())
         .map(|(point2d, point3d): (&Point2D, &Point3D)| {
-            ZBufferedVertex { /* convert from cartesian system to bitmap system */
+            ZBufferedVertex {
+                /* convert from cartesian system to bitmap system */
                 x: point2d.x + offset_width as f32,
                 y: -point2d.y + offset_height as f32,
-                distance: point3d.z
+                distance: point3d.z,
             }
         })
         .collect();
 
     ZBufferedTriangle {
         vertices: z_buffered_vertices.try_into().unwrap(),
-        color
+        color,
     }
 }

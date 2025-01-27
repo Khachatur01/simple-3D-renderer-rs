@@ -10,17 +10,17 @@ pub mod coefficients;
 #[derive(Serialize, Deserialize)]
 pub struct Plane {
     /** coefficients of plane equation */
-    pub coefficients: Coefficients
+    pub coefficients: Coefficients,
 }
 
 impl Plane {
     pub fn new(normal: Vector, point: Point) -> Plane {
         let Vector { x: a, y: b, z: c } = normal;
 
-        let d: f32 = a*point.x + b*point.y + c*point.z;
+        let d: f32 = a * point.x + b * point.y + c * point.z;
 
         Plane {
-            coefficients: Coefficients { a, b, c, d, }
+            coefficients: Coefficients { a, b, c, d },
         }
     }
 }

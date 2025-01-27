@@ -21,10 +21,10 @@ impl Vector {
         match axis {
             Axis::X => {
                 /*
-                * |  0       0      1| |x|   |        x        |   |x'|
-                * |cos θ   −sin θ   0| |y|   |y cos θ − z sin θ|   |y'|
-                * |sin θ    cos θ   0| |z| = |y sin θ + z cos θ| = |z'|
-                * */
+                 * |  0       0      1| |x|   |        x        |   |x'|
+                 * |cos θ   −sin θ   0| |y|   |y cos θ − z sin θ|   |y'|
+                 * |sin θ    cos θ   0| |z| = |y sin θ + z cos θ| = |z'|
+                 * */
                 let y = self.y * cos_alpha - self.z * sin_alpha;
                 let z = self.y * sin_alpha + self.z * cos_alpha;
 
@@ -34,10 +34,10 @@ impl Vector {
             }
             Axis::Y => {
                 /*
-                * | cos θ    0   sin θ| |x|   | x cos θ + z sin θ|   |x'|
-                * |   0      y       0| |y| = |         y        | = |y'|
-                * |−sin θ    0   cos θ| |z|   |−x sin θ + z cos θ|   |z'|
-                * */
+                 * | cos θ    0   sin θ| |x|   | x cos θ + z sin θ|   |x'|
+                 * |   0      y       0| |y| = |         y        | = |y'|
+                 * |−sin θ    0   cos θ| |z|   |−x sin θ + z cos θ|   |z'|
+                 * */
                 let x = self.x * cos_alpha + self.z * sin_alpha;
                 let z = -self.x * sin_alpha + self.z * cos_alpha;
 
@@ -47,10 +47,10 @@ impl Vector {
             }
             Axis::Z => {
                 /*
-                * |0   cos θ    −sin θ| |x| = |x cos θ − y sin θ| = |x'|
-                * |0   sin θ     cos θ| |y|   |x sin θ + y cos θ|   |y'|
-                * |1     0           0| |z|   |        z        |   |z'|
-                * */
+                 * |0   cos θ    −sin θ| |x| = |x cos θ − y sin θ| = |x'|
+                 * |0   sin θ     cos θ| |y|   |x sin θ + y cos θ|   |y'|
+                 * |1     0           0| |z|   |        z        |   |z'|
+                 * */
                 let x = self.x * cos_alpha - self.y * sin_alpha;
                 let y = self.x * sin_alpha + self.y * cos_alpha;
 
